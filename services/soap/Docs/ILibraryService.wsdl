@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://example.com/library/wsdl"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:http="http://schemas.microsoft.com/ws/06/2004/policy/http"
+    xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract"
+    xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+    xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
+    targetNamespace="http://example.com/library/wsdl"
+    name="ILibraryService"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <wsdl:types>
+        <!-- Library types: see ILibraryService.xsd -->
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+            <xs:import namespace="http://example.com/library/wsdl"
+                       schemaLocation="ILibraryService.xsd" />
+        </xs:schema>
+
+        <!-- Microsoft serialization primitives (standard MS artifact, kept inline) -->
+        <xs:schema attributeFormDefault="qualified"
+                   elementFormDefault="qualified"
+                   targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/"
+                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/">
+            <xs:element name="anyType"       nillable="true" type="xs:anyType" />
+            <xs:element name="anyURI"        nillable="true" type="xs:anyURI" />
+            <xs:element name="base64Binary"  nillable="true" type="xs:base64Binary" />
+            <xs:element name="boolean"       nillable="true" type="xs:boolean" />
+            <xs:element name="byte"          nillable="true" type="xs:byte" />
+            <xs:element name="dateTime"      nillable="true" type="xs:dateTime" />
+            <xs:element name="decimal"       nillable="true" type="xs:decimal" />
+            <xs:element name="double"        nillable="true" type="xs:double" />
+            <xs:element name="float"         nillable="true" type="xs:float" />
+            <xs:element name="int"           nillable="true" type="xs:int" />
+            <xs:element name="long"          nillable="true" type="xs:long" />
+            <xs:element name="QName"         nillable="true" type="xs:QName" />
+            <xs:element name="short"         nillable="true" type="xs:short" />
+            <xs:element name="string"        nillable="true" type="xs:string" />
+            <xs:element name="unsignedByte"  nillable="true" type="xs:unsignedByte" />
+            <xs:element name="unsignedInt"   nillable="true" type="xs:unsignedInt" />
+            <xs:element name="unsignedLong"  nillable="true" type="xs:unsignedLong" />
+            <xs:element name="unsignedShort" nillable="true" type="xs:unsignedShort" />
+            <xs:element name="char"          nillable="true" type="tns:char" />
+            <xs:simpleType name="char">
+                <xs:restriction base="xs:int" />
+            </xs:simpleType>
+            <xs:element name="duration" nillable="true" type="tns:duration" />
+            <xs:simpleType name="duration">
+                <xs:restriction base="xs:duration">
+                    <xs:pattern value="\-?P(\d*D)?(T(\d*H)?(\d*M)?(\d*(\.\d*)?S)?)?" />
+                    <xs:minInclusive value="-P10675199DT2H48M5.4775808S" />
+                    <xs:maxInclusive value="P10675199DT2H48M5.4775807S" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:element name="guid" nillable="true" type="tns:guid" />
+            <xs:simpleType name="guid">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:attribute name="FactoryType" type="xs:QName" />
+            <xs:attribute name="Id"          type="xs:ID" />
+            <xs:attribute name="Ref"         type="xs:IDREF" />
+        </xs:schema>
+
+        <!-- MS serialization arrays (empty, kept inline) -->
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/Arrays"
+                   elementFormDefault="qualified"
+                   targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+            <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+        </xs:schema>
+    </wsdl:types>
+
+    <!-- ==================== Messages ==================== -->
+    <wsdl:message name="ILibraryService_CreateBook_InputMessage">
+        <wsdl:part name="parameters" element="tns:CreateBook" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_CreateBook_OutputMessage">
+        <wsdl:part name="parameters" element="tns:CreateBookResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_CreateBook_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ValidationFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_GetBookById_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetBookById" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_GetBookById_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetBookByIdResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_GetBookById_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_UpdateBook_InputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateBook" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdateBook_OutputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateBookResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdateBook_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ValidationFault" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdateBook_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_DeleteBook_InputMessage">
+        <wsdl:part name="parameters" element="tns:DeleteBook" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeleteBook_OutputMessage">
+        <wsdl:part name="parameters" element="tns:DeleteBookResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeleteBook_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_CreateAuthor_InputMessage">
+        <wsdl:part name="parameters" element="tns:CreateAuthor" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_CreateAuthor_OutputMessage">
+        <wsdl:part name="parameters" element="tns:CreateAuthorResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_CreateAuthor_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ValidationFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_GetAuthorById_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetAuthorById" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_GetAuthorById_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetAuthorByIdResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_GetAuthorById_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_ListAuthors_InputMessage">
+        <wsdl:part name="parameters" element="tns:ListAuthors" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_ListAuthors_OutputMessage">
+        <wsdl:part name="parameters" element="tns:ListAuthorsResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_ListAuthors_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_UpdateAuthor_InputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateAuthor" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdateAuthor_OutputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateAuthorResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdateAuthor_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ValidationFault" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdateAuthor_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_DeleteAuthor_InputMessage">
+        <wsdl:part name="parameters" element="tns:DeleteAuthor" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeleteAuthor_OutputMessage">
+        <wsdl:part name="parameters" element="tns:DeleteAuthorResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeleteAuthor_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeleteAuthor_ConflictFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ConflictFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_CreatePublishingCompany_InputMessage">
+        <wsdl:part name="parameters" element="tns:CreatePublishingCompany" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_CreatePublishingCompany_OutputMessage">
+        <wsdl:part name="parameters" element="tns:CreatePublishingCompanyResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_CreatePublishingCompany_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ValidationFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_GetPublishingCompanyById_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetPublishingCompanyById" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_GetPublishingCompanyById_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetPublishingCompanyByIdResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_GetPublishingCompanyById_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_ListPublishingCompanies_InputMessage">
+        <wsdl:part name="parameters" element="tns:ListPublishingCompanies" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_ListPublishingCompanies_OutputMessage">
+        <wsdl:part name="parameters" element="tns:ListPublishingCompaniesResponse" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_UpdatePublishingCompany_InputMessage">
+        <wsdl:part name="parameters" element="tns:UpdatePublishingCompany" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdatePublishingCompany_OutputMessage">
+        <wsdl:part name="parameters" element="tns:UpdatePublishingCompanyResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdatePublishingCompany_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_UpdatePublishingCompany_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ValidationFault" />
+    </wsdl:message>
+
+    <wsdl:message name="ILibraryService_DeletePublishingCompany_InputMessage">
+        <wsdl:part name="parameters" element="tns:DeletePublishingCompany" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeletePublishingCompany_OutputMessage">
+        <wsdl:part name="parameters" element="tns:DeletePublishingCompanyResponse" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeletePublishingCompany_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:NotFoundFault" />
+    </wsdl:message>
+    <wsdl:message name="ILibraryService_DeletePublishingCompany_ConflictFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="tns:ConflictFault" />
+    </wsdl:message>
+
+    <!-- ==================== Port type ==================== -->
+    <wsdl:portType name="ILibraryService">
+        <wsdl:operation name="CreateBook">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/CreateBook"         message="tns:ILibraryService_CreateBook_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/CreateBookResponse" message="tns:ILibraryService_CreateBook_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/CreateBookValidationFaultFault" name="ValidationFaultFault" message="tns:ILibraryService_CreateBook_ValidationFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="GetBookById">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/GetBookById"         message="tns:ILibraryService_GetBookById_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/GetBookByIdResponse" message="tns:ILibraryService_GetBookById_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/GetBookByIdNotFoundFaultFault" name="NotFoundFaultFault" message="tns:ILibraryService_GetBookById_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="UpdateBook">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateBook"         message="tns:ILibraryService_UpdateBook_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateBookResponse" message="tns:ILibraryService_UpdateBook_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateBookValidationFaultFault" name="ValidationFaultFault" message="tns:ILibraryService_UpdateBook_ValidationFaultFault_FaultMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateBookNotFoundFaultFault"   name="NotFoundFaultFault"   message="tns:ILibraryService_UpdateBook_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="DeleteBook">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeleteBook"         message="tns:ILibraryService_DeleteBook_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/DeleteBookResponse" message="tns:ILibraryService_DeleteBook_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeleteBookNotFoundFaultFault" name="NotFoundFaultFault" message="tns:ILibraryService_DeleteBook_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="CreateAuthor">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/CreateAuthor"         message="tns:ILibraryService_CreateAuthor_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/CreateAuthorResponse" message="tns:ILibraryService_CreateAuthor_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/CreateAuthorValidationFaultFault" name="ValidationFaultFault" message="tns:ILibraryService_CreateAuthor_ValidationFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="GetAuthorById">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/GetAuthorById"         message="tns:ILibraryService_GetAuthorById_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/GetAuthorByIdResponse" message="tns:ILibraryService_GetAuthorById_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/GetAuthorByIdNotFoundFaultFault" name="NotFoundFaultFault" message="tns:ILibraryService_GetAuthorById_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="ListAuthors">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/ListAuthors"         message="tns:ILibraryService_ListAuthors_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/ListAuthorsResponse" message="tns:ILibraryService_ListAuthors_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/ListAuthorsNotFoundFaultFault" name="NotFoundFaultFault" message="tns:ILibraryService_ListAuthors_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="UpdateAuthor">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateAuthor"         message="tns:ILibraryService_UpdateAuthor_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateAuthorResponse" message="tns:ILibraryService_UpdateAuthor_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateAuthorValidationFaultFault" name="ValidationFaultFault" message="tns:ILibraryService_UpdateAuthor_ValidationFaultFault_FaultMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdateAuthorNotFoundFaultFault"   name="NotFoundFaultFault"   message="tns:ILibraryService_UpdateAuthor_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="DeleteAuthor">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeleteAuthor"         message="tns:ILibraryService_DeleteAuthor_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/DeleteAuthorResponse" message="tns:ILibraryService_DeleteAuthor_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeleteAuthorNotFoundFaultFault"  name="NotFoundFaultFault"  message="tns:ILibraryService_DeleteAuthor_NotFoundFaultFault_FaultMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeleteAuthorConflictFaultFault"  name="ConflictFaultFault"  message="tns:ILibraryService_DeleteAuthor_ConflictFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="CreatePublishingCompany">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/CreatePublishingCompany"         message="tns:ILibraryService_CreatePublishingCompany_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/CreatePublishingCompanyResponse" message="tns:ILibraryService_CreatePublishingCompany_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/CreatePublishingCompanyValidationFaultFault" name="ValidationFaultFault" message="tns:ILibraryService_CreatePublishingCompany_ValidationFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="GetPublishingCompanyById">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/GetPublishingCompanyById"         message="tns:ILibraryService_GetPublishingCompanyById_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/GetPublishingCompanyByIdResponse" message="tns:ILibraryService_GetPublishingCompanyById_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/GetPublishingCompanyByIdNotFoundFaultFault" name="NotFoundFaultFault" message="tns:ILibraryService_GetPublishingCompanyById_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="ListPublishingCompanies">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/ListPublishingCompanies"         message="tns:ILibraryService_ListPublishingCompanies_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/ListPublishingCompaniesResponse" message="tns:ILibraryService_ListPublishingCompanies_OutputMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="UpdatePublishingCompany">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompany"         message="tns:ILibraryService_UpdatePublishingCompany_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompanyResponse" message="tns:ILibraryService_UpdatePublishingCompany_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompanyNotFoundFaultFault"   name="NotFoundFaultFault"   message="tns:ILibraryService_UpdatePublishingCompany_NotFoundFaultFault_FaultMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompanyValidationFaultFault" name="ValidationFaultFault" message="tns:ILibraryService_UpdatePublishingCompany_ValidationFaultFault_FaultMessage" />
+        </wsdl:operation>
+        <wsdl:operation name="DeletePublishingCompany">
+            <wsdl:input  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeletePublishingCompany"         message="tns:ILibraryService_DeletePublishingCompany_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/ILibraryService/DeletePublishingCompanyResponse" message="tns:ILibraryService_DeletePublishingCompany_OutputMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeletePublishingCompanyNotFoundFaultFault"  name="NotFoundFaultFault"  message="tns:ILibraryService_DeletePublishingCompany_NotFoundFaultFault_FaultMessage" />
+            <wsdl:fault  wsam:Action="http://example.com/library/wsdl/ILibraryService/DeletePublishingCompanyConflictFaultFault"  name="ConflictFaultFault"  message="tns:ILibraryService_DeletePublishingCompany_ConflictFaultFault_FaultMessage" />
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- ==================== Binding ==================== -->
+    <wsdl:binding name="BasicHttpBinding_ILibraryService" type="tns:ILibraryService">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="CreateBook">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/CreateBook" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="ValidationFaultFault"> <soap:fault use="literal" name="ValidationFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="GetBookById">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/GetBookById" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault"> <soap:fault use="literal" name="NotFoundFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateBook">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/UpdateBook" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="ValidationFaultFault"> <soap:fault use="literal" name="ValidationFaultFault" /> </wsdl:fault>
+            <wsdl:fault name="NotFoundFaultFault">   <soap:fault use="literal" name="NotFoundFaultFault" />   </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="DeleteBook">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/DeleteBook" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault"> <soap:fault use="literal" name="NotFoundFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="CreateAuthor">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/CreateAuthor" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="ValidationFaultFault"> <soap:fault use="literal" name="ValidationFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="GetAuthorById">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/GetAuthorById" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault"> <soap:fault use="literal" name="NotFoundFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="ListAuthors">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/ListAuthors" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault"> <soap:fault use="literal" name="NotFoundFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateAuthor">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/UpdateAuthor" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="ValidationFaultFault"> <soap:fault use="literal" name="ValidationFaultFault" /> </wsdl:fault>
+            <wsdl:fault name="NotFoundFaultFault">   <soap:fault use="literal" name="NotFoundFaultFault" />   </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="DeleteAuthor">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/DeleteAuthor" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault">  <soap:fault use="literal" name="NotFoundFaultFault" />  </wsdl:fault>
+            <wsdl:fault name="ConflictFaultFault">  <soap:fault use="literal" name="ConflictFaultFault" />  </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="CreatePublishingCompany">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/CreatePublishingCompany" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="ValidationFaultFault"> <soap:fault use="literal" name="ValidationFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="GetPublishingCompanyById">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/GetPublishingCompanyById" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault"> <soap:fault use="literal" name="NotFoundFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="ListPublishingCompanies">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/ListPublishingCompanies" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="UpdatePublishingCompany">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompany" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault">   <soap:fault use="literal" name="NotFoundFaultFault" />   </wsdl:fault>
+            <wsdl:fault name="ValidationFaultFault"> <soap:fault use="literal" name="ValidationFaultFault" /> </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="DeletePublishingCompany">
+            <soap:operation soapAction="http://example.com/library/wsdl/ILibraryService/DeletePublishingCompany" style="document" />
+            <wsdl:input>  <soap:body use="literal" /> </wsdl:input>
+            <wsdl:output> <soap:body use="literal" /> </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault">  <soap:fault use="literal" name="NotFoundFaultFault" />  </wsdl:fault>
+            <wsdl:fault name="ConflictFaultFault">  <soap:fault use="literal" name="ConflictFaultFault" />  </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ==================== Service ==================== -->
+    <wsdl:service name="ILibraryService">
+        <wsdl:port name="BasicHttpBinding_ILibraryService" binding="tns:BasicHttpBinding_ILibraryService">
+            <soap:address location="http://localhost:5292/LibraryService.asmx" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

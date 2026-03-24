@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    All XML Schema type definitions for ILibraryService.
+    Referenced by ILibraryService.wsdl via xs:import in <wsdl:types>.
+
+    Note: The original WSDL had 4 separate xs:schema blocks. Two of them
+    shared the same targetNamespace (http://example.com/library/wsdl) and
+    are merged here into one. The Microsoft serialization schema
+    (http://schemas.microsoft.com/2003/10/Serialization/) is a standard
+    Microsoft artifact kept inline in the WSDL's <wsdl:types> as it was.
+-->
+<xs:schema elementFormDefault="qualified"
+           targetNamespace="http://example.com/library/wsdl"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://example.com/library/wsdl"
+           xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+
+    <xs:import namespace="http://schemas.datacontract.org/2004/07/System" />
+    <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+
+    <!-- ================================================================
+         BOOK
+         ================================================================ -->
+
+    <!-- Message wrappers -->
+    <xs:element name="CreateBook">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:CreateBook" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="CreateBookResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="CreateBookResult" type="xs:int" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GetBookById">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:GetBookById" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GetBookByIdResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="GetBookByIdResult" nillable="true" type="tns:Tbook" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="UpdateBook">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:UpdateBook" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="UpdateBookResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="UpdateBookResult" nillable="true" type="tns:Tbook" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="DeleteBook">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:DeleteBook" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="DeleteBookResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="DeleteBookResult" nillable="true" type="tns:Tbook" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Domain types -->
+    <xs:complexType name="CreateBook">
+        <xs:sequence>
+            <xs:element minOccurs="1" name="CTitle" nillable="true" type="xs:string" />
+            <xs:element minOccurs="1" name="NAuthorId" type="xs:int" />
+            <xs:element minOccurs="1" name="NPublishingYear" type="xs:int" />
+            <xs:element minOccurs="1" name="NPublishingCompanyId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="CreateBookType" nillable="true" type="tns:CreateBook" />
+
+    <xs:complexType name="GetBookById">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="NBookId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="GetBookByIdType" nillable="true" type="tns:GetBookById" />
+
+    <xs:complexType name="Tbook">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="CTitle" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="NAuthorId" type="xs:int" />
+            <xs:element minOccurs="0" name="NBookId" type="xs:int" />
+            <xs:element minOccurs="0" name="NPublishingCompanyId" type="xs:int" />
+            <xs:element nillable="true" minOccurs="0" name="NPublishingYear" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Tbook" nillable="true" type="tns:Tbook" />
+
+    <xs:complexType name="UpdateBook">
+        <xs:sequence>
+            <xs:element minOccurs="1" name="NBookId" type="xs:int" />
+            <xs:element minOccurs="0" name="CTitle" nillable="true" type="xs:string" />
+            <xs:element nillable="true" minOccurs="0" name="NAuthorId" type="xs:int" />
+            <xs:element nillable="true" minOccurs="0" name="NPublishingYear" type="xs:int" />
+            <xs:element nillable="true" minOccurs="0" name="NPublishingCompanyId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="UpdateBookType" nillable="true" type="tns:UpdateBook" />
+
+    <xs:complexType name="DeleteBook">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="NBookId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="DeleteBookType" nillable="true" type="tns:DeleteBook" />
+
+    <!-- ================================================================
+         AUTHOR
+         ================================================================ -->
+
+    <!-- Message wrappers -->
+    <xs:element name="CreateAuthor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:CreateAuthor" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="CreateAuthorResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="CreateAuthorResult" type="xs:int" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GetAuthorById">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:GetAuthorById" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GetAuthorByIdResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="GetAuthorByIdResult" nillable="true" type="tns:Tauthor" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ListAuthors">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:ListAuthors" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ListAuthorsResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="ListAuthorsResult" nillable="true" type="tns:ArrayOfTauthor" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="UpdateAuthor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:UpdateAuthor" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="UpdateAuthorResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="UpdateAuthorResult" nillable="true" type="tns:Tauthor" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="DeleteAuthor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:DeleteAuthor" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="DeleteAuthorResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="DeleteAuthorResult" nillable="true" type="tns:Tauthor" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Domain types -->
+    <xs:complexType name="CreateAuthor">
+        <xs:sequence>
+            <xs:element minOccurs="1" name="CName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="CSurname" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="CreateAuthorType" nillable="true" type="tns:CreateAuthor" />
+
+    <xs:complexType name="GetAuthorById">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="NAuthorId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="GetAuthorByIdType" nillable="true" type="tns:GetAuthorById" />
+
+    <xs:complexType name="Tauthor">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="CName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="CSurname" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="NAuthorId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Tauthor" nillable="true" type="tns:Tauthor" />
+
+    <xs:complexType name="ListAuthors">
+        <xs:sequence />
+    </xs:complexType>
+    <xs:element name="ListAuthorsType" nillable="true" type="tns:ListAuthors" />
+
+    <xs:complexType name="UpdateAuthor">
+        <xs:sequence>
+            <xs:element minOccurs="1" name="NAuthorId" type="xs:int" />
+            <xs:element minOccurs="0" name="CName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="CSurname" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="UpdateAuthorType" nillable="true" type="tns:UpdateAuthor" />
+
+    <xs:complexType name="DeleteAuthor">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="NAuthorId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="DeleteAuthorType" nillable="true" type="tns:DeleteAuthor" />
+
+    <xs:complexType name="ArrayOfTauthor">
+        <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="Tauthor" nillable="true" type="tns:Tauthor" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="ArrayOfTauthor" nillable="true" type="tns:ArrayOfTauthor" />
+
+    <!-- ================================================================
+         PUBLISHING COMPANY
+         ================================================================ -->
+
+    <!-- Message wrappers -->
+    <xs:element name="CreatePublishingCompany">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:CreatePublishingCompany" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="CreatePublishingCompanyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="CreatePublishingCompanyResult" type="xs:int" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GetPublishingCompanyById">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:GetPublishingCompanyById" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GetPublishingCompanyByIdResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="GetPublishingCompanyByIdResult" nillable="true" type="tns:Tpublishingcompany" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ListPublishingCompanies">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:ListPublishingCompanies" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ListPublishingCompaniesResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="ListPublishingCompaniesResult" nillable="true" type="tns:ArrayOfTpublishingcompany" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="UpdatePublishingCompany">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:UpdatePublishingCompany" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="UpdatePublishingCompanyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="UpdatePublishingCompanyResult" nillable="true" type="tns:Tpublishingcompany" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="DeletePublishingCompany">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="request" nillable="true" type="tns:DeletePublishingCompany" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="DeletePublishingCompanyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" name="DeletePublishingCompanyResult" nillable="true" type="tns:Tpublishingcompany" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Domain types -->
+    <xs:complexType name="CreatePublishingCompany">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="CName" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="CreatePublishingCompanyType" nillable="true" type="tns:CreatePublishingCompany" />
+
+    <xs:complexType name="GetPublishingCompanyById">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="NPublishingCompanyId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="GetPublishingCompanyByIdType" nillable="true" type="tns:GetPublishingCompanyById" />
+
+    <xs:complexType name="Tpublishingcompany">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="CName" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="NPublishingCompanyId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Tpublishingcompany" nillable="true" type="tns:Tpublishingcompany" />
+
+    <xs:complexType name="ListPublishingCompanies">
+        <xs:sequence />
+    </xs:complexType>
+    <xs:element name="ListPublishingCompaniesType" nillable="true" type="tns:ListPublishingCompanies" />
+
+    <xs:complexType name="UpdatePublishingCompany">
+        <xs:sequence>
+            <xs:element minOccurs="1" name="NPublishingCompanyId" type="xs:int" />
+            <xs:element minOccurs="1" name="CName" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="UpdatePublishingCompanyType" nillable="true" type="tns:UpdatePublishingCompany" />
+
+    <xs:complexType name="DeletePublishingCompany">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="NPublishingCompanyId" type="xs:int" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="DeletePublishingCompanyType" nillable="true" type="tns:DeletePublishingCompany" />
+
+    <xs:complexType name="ArrayOfTpublishingcompany">
+        <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="Tpublishingcompany" nillable="true" type="tns:Tpublishingcompany" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="ArrayOfTpublishingcompany" nillable="true" type="tns:ArrayOfTpublishingcompany" />
+
+    <!-- ================================================================
+         FAULT TYPES
+         ================================================================ -->
+    <xs:complexType name="ValidationFault">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ErrorMessage" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="ValidationFault" nillable="true" type="tns:ValidationFault" />
+
+    <xs:complexType name="NotFoundFault">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ErrorMessage" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="NotFoundFault" nillable="true" type="tns:NotFoundFault" />
+
+    <xs:complexType name="ConflictFault">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="ErrorMessage" nillable="true" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="ConflictFault" nillable="true" type="tns:ConflictFault" />
+
+</xs:schema>

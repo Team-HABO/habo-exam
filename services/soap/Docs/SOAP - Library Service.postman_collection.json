@@ -1,0 +1,2036 @@
+{
+  "info": {
+    "_postman_id": "b2dddcee-253f-4604-b29a-8724ed451bd1",
+    "name": "SOAP - Library Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53145194",
+    "_collection_link": "https://go.postman.co/collection/53145194-b2dddcee-253f-4604-b29a-8724ed451bd1?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Get WSDL",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx?wsdl",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ],
+          "query": [
+            {
+              "key": "wsdl",
+              "value": null
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Health Check",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/health",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "CreateBook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/CreateBook"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <CreateBook xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <CTitle>I'm a cool new title!</CTitle>\n                <NAuthorId>1</NAuthorId>\n                <NPublishingYear>2008</NPublishingYear>\n                <NPublishingCompanyId>3</NPublishingCompanyId>\n            </request>\n        </CreateBook>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "CreateBook response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/CreateBook"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <CreateBook xmlns=\"http://example.com/tbook\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <CreateBookResponse xmlns=\"http://example.com/library/wsdl\">\n      <CreateBookResult/>\n    </CreateBookResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "CreateBook fault - ValidationFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/CreateBook"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ValidationFault xmlns=\"http://example.com/validation-fault\"/>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "GetBookById",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/GetBookById"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetBookById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <NBookId>2000</NBookId>\n      </request>\n    </GetBookById>\n  </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "GetBookById response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/GetBookById"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetBookById xmlns=\"http://example.com/tbook\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetBookByIdResponse xmlns=\"http://example.com/library/wsdl\">\n      <GetBookByIdResult/>\n    </GetBookByIdResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "GetBookById fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/GetBookById"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <NotFoundFault xmlns=\"http://example.com/not-found-fault\"/>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "UpdateBook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/UpdateBook"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdateBook xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NBookId>2000</NBookId>\n                <CTitle>I'm a cool new updated title</CTitle>\n                <NAuthorId>2</NAuthorId>\n                <NPublishingYear>2020</NPublishingYear>\n                <NPublishingCompanyId>1</NPublishingCompanyId>\n            </request>\n        </UpdateBook>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "UpdateBook response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdateBook"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <UpdateBook xmlns=\"http://example.com/tbook\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <UpdateBookResponse xmlns=\"http://example.com/library/wsdl\">\n      <UpdateBookResult/>\n    </UpdateBookResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "UpdateBook fault - ValidationFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdateBook"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ValidationFault xmlns=\"http://example.com/validation-fault\"/>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "DeleteBook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/DeleteBook"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeleteBook xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NBookId>2000</NBookId>\n            </request>\n        </DeleteBook>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "DeleteBook response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeleteBook"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <DeleteBook xmlns=\"http://example.com/tbook\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <DeleteBookResponse xmlns=\"http://example.com/library/wsdl\">\n      <DeleteBookResult/>\n    </DeleteBookResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "DeleteBook fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeleteBook"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <NotFoundFault xmlns=\"http://example.com/not-found-fault\"/>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "CreateAuthor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/CreateAuthor"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <CreateAuthor xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <CName>Brian</CName>\n                <CSurname>Blume</CSurname>\n            </request>\n        </CreateAuthor>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "CreateAuthor response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/CreateAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <CreateAuthor xmlns=\"http://schemas.datacontract.org/2004/07/soap.Models\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <CreateAuthorResponse xmlns=\"http://example.com/library/wsdl\">\n      <CreateAuthorResult>100</CreateAuthorResult>\n    </CreateAuthorResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "CreateAuthor fault - ValidationFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/CreateAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found ValidationFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "GetAuthorById",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/GetAuthorById"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetAuthorById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n         <NAuthorId>511</NAuthorId>\n      </request>\n    </GetAuthorById>\n  </soap:Body>\n</soap:Envelope>\n",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "GetAuthorById response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/GetAuthorById"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetAuthorById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </GetAuthorById>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetAuthorByIdResponse xmlns=\"http://example.com/library/wsdl\">\n      <GetAuthorByIdResult>The element or type could not be found</GetAuthorByIdResult>\n    </GetAuthorByIdResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "GetAuthorById fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/GetAuthorById"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found NotFoundFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "ListAuthors",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/ListAuthors"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <ListAuthors xmlns=\"http://example.com/library/wsdl\">\n            <request/>\n        </ListAuthors>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "ListAuthors response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/ListAuthors"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ListAuthors xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </ListAuthors>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ListAuthorsResponse xmlns=\"http://example.com/library/wsdl\">\n      <ListAuthorsResult>The element or type could not be found</ListAuthorsResult>\n    </ListAuthorsResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "ListAuthors fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/ListAuthors"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found NotFoundFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "UpdateAuthor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/UpdateAuthor"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdateAuthor xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NAuthorId>511</NAuthorId>\n                <CName>Ali</CName>\n                <CSurname>Mohammad</CSurname>\n            </request>\n        </UpdateAuthor>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "UpdateAuthor response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdateAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <UpdateAuthor xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </UpdateAuthor>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <UpdateAuthorResponse xmlns=\"http://example.com/library/wsdl\">\n      <UpdateAuthorResult>The element or type could not be found</UpdateAuthorResult>\n    </UpdateAuthorResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "UpdateAuthor fault - ValidationFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdateAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found ValidationFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "UpdateAuthor fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdateAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found NotFoundFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "DeleteAuthor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/DeleteAuthor"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeleteAuthor xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NAuthorId>511</NAuthorId>\n            </request>\n        </DeleteAuthor>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "DeleteAuthor response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeleteAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <DeleteAuthor xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </DeleteAuthor>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <DeleteAuthorResponse xmlns=\"http://example.com/library/wsdl\">\n      <DeleteAuthorResult>The element or type could not be found</DeleteAuthorResult>\n    </DeleteAuthorResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "DeleteAuthor fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeleteAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found NotFoundFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "DeleteAuthor fault - ConflictFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeleteAuthor"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found ConflictFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "CreatePublishingCompany",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/CreatePublishingCompany"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <CreatePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <CName>I'm a cool new company!</CName>\n            </request>\n        </CreatePublishingCompany>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "CreatePublishingCompany response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/CreatePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <CreatePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </CreatePublishingCompany>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <CreatePublishingCompanyResponse xmlns=\"http://example.com/library/wsdl\">\n      <CreatePublishingCompanyResult>100</CreatePublishingCompanyResult>\n    </CreatePublishingCompanyResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "CreatePublishingCompany fault - ValidationFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/CreatePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found ValidationFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "GetPublishingCompanyById",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/GetPublishingCompanyById"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetPublishingCompanyById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n             <NPublishingCompanyId>159</NPublishingCompanyId>\n      </request>\n    </GetPublishingCompanyById>\n  </soap:Body>\n</soap:Envelope>\n",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "GetPublishingCompanyById response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/GetPublishingCompanyById"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetPublishingCompanyById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </GetPublishingCompanyById>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetPublishingCompanyByIdResponse xmlns=\"http://example.com/library/wsdl\">\n      <GetPublishingCompanyByIdResult>The element or type could not be found</GetPublishingCompanyByIdResult>\n    </GetPublishingCompanyByIdResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "GetPublishingCompanyById fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/GetPublishingCompanyById"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found NotFoundFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "ListPublishingCompanies",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/ListPublishingCompanies"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <ListPublishingCompanies xmlns=\"http://example.com/library/wsdl\">\n            <request>\n      </request>\n        </ListPublishingCompanies>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "ListPublishingCompanies response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/ListPublishingCompanies"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ListPublishingCompanies xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </ListPublishingCompanies>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ListPublishingCompaniesResponse xmlns=\"http://example.com/library/wsdl\">\n      <ListPublishingCompaniesResult>The element or type could not be found</ListPublishingCompaniesResult>\n    </ListPublishingCompaniesResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "UpdatePublishingCompany",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompany"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdatePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NPublishingCompanyId>159</NPublishingCompanyId>\n                <CName>New company name!!</CName>\n            </request>\n        </UpdatePublishingCompany>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "UpdatePublishingCompany response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <UpdatePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <request>The element or type could not be found</request>\n      </request>\n    </UpdatePublishingCompany>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <UpdatePublishingCompanyResponse xmlns=\"http://example.com/library/wsdl\">\n      <UpdatePublishingCompanyResult>The element or type could not be found</UpdatePublishingCompanyResult>\n    </UpdatePublishingCompanyResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "UpdatePublishingCompany fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found NotFoundFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "UpdatePublishingCompany fault - ValidationFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/UpdatePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found ValidationFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "DeletePublishingCompany",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "http://example.com/library/wsdl/ILibraryService/DeletePublishingCompany"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeletePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NPublishingCompanyId>159</NPublishingCompanyId>\n            </request>\n        </DeletePublishingCompany>\n    </soap:Body>\n</soap:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "DeletePublishingCompany response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeletePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <DeletePublishingCompany xmlns=\"http://schemas.datacontract.org/2004/07/soap.Models\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <DeletePublishingCompanyResponse xmlns=\"http://example.com/library/wsdl\">\n      <DeletePublishingCompanyResult>The element or type could not be found</DeletePublishingCompanyResult>\n    </DeletePublishingCompanyResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "DeletePublishingCompany fault - NotFoundFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeletePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found NotFoundFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        },
+        {
+          "name": "DeletePublishingCompany fault - ConflictFault",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              },
+              {
+                "key": "SOAPAction",
+                "value": "http://example.com/library/wsdl/ILibraryService/DeletePublishingCompany"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "incorrect body message",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5292/LibraryService.asmx",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5292",
+              "path": [
+                "LibraryService.asmx"
+              ]
+            }
+          },
+          "status": "not OK",
+          "code": 500,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found ConflictFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    }
+  ]
+}
