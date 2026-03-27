@@ -31,5 +31,5 @@
 			"omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git https://github.com/zdharma-continuum/fast-syntax-highlighting.git"
 		}
 	},
-	"forwardPorts": [5432, 5050]
+	"forwardPorts": [5432, 5050, 3000]
 }

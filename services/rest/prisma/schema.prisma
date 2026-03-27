@@ -19,10 +19,10 @@ model Book {
   publishingYear Int
 
   authorId Int
-  author   Author @relation(fields: [authorId], references: [id])
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   publishingCompanyId Int
-  publishingCompany   PublishingCompany @relation(fields: [publishingCompanyId], references: [id])
+  publishingCompany   PublishingCompany @relation(fields: [publishingCompanyId], references: [id], onDelete: Cascade)
 }
 
 model Author {
