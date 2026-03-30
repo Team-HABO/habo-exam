@@ -691,3 +691,11 @@ $RECYCLE.BIN/
 
 services/rest/generated/prisma/**
 services/graph/src/generated/prisma
+
+### JetBrains ###
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/

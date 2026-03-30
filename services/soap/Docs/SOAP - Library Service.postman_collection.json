@@ -8,42 +8,24 @@
   },
   "item": [
     {
-      "name": "Get WSDL",
-      "protocolProfileBehavior": {
-        "disableBodyPruning": true
-      },
-      "request": {
-        "method": "GET",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseURL}}/LibraryService.asmx?wsdl",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "LibraryService.asmx"
-          ],
-          "query": [
-            {
-              "key": "wsdl",
-              "value": null
-            }
-          ]
-        }
-      },
-      "response": []
-    },
-    {
       "name": "Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})"
+            ]
+          }
+        }
+      ],
       "protocolProfileBehavior": {
         "disableBodyPruning": true
       },
@@ -72,7 +54,112 @@
       "response": []
     },
     {
+      "name": "Get WSDL",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response contains WSDL definitions', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('wsdl:definitions') || body.includes('definitions');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/LibraryService.asmx?wsdl",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "LibraryService.asmx"
+          ],
+          "query": [
+            {
+              "key": "wsdl",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "CreateBook",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "});",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "});",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "});",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "});",
+              "",
+              "pm.test('CreateBook returns a valid book ID', function () {",
+              "    const json = xml2Json(responseBody);",
+              "    const envelopeKey = Object.keys(json).find(k => k.includes('Envelope'));",
+              "    const envelope = json[envelopeKey];",
+              "    const bodyKey = Object.keys(envelope).find(k => k.includes('Body'));",
+              "    const body = envelope[bodyKey];",
+              "    const result = body['CreateBookResponse']['CreateBookResult'];",
+              "    pm.expect(result).to.exist;",
+              "    pm.expect(Number(result)).to.be.above(0);",
+              "    pm.collectionVariables.set('bookId', result);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -203,6 +290,41 @@
     },
     {
       "name": "GetBookById",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('GetBookByIdResult') || body.includes('GetBookByIdResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -217,7 +339,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetBookById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <NBookId>2000</NBookId>\n      </request>\n    </GetBookById>\n  </soap:Body>\n</soap:Envelope>",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetBookById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <NBookId>{{bookId}}</NBookId>\n      </request>\n    </GetBookById>\n  </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -333,6 +455,41 @@
     },
     {
       "name": "UpdateBook",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('UpdateBookResult') || body.includes('UpdateBookResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -347,7 +504,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdateBook xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NBookId>2000</NBookId>\n                <CTitle>I'm a cool new updated title</CTitle>\n                <NAuthorId>2</NAuthorId>\n                <NPublishingYear>2020</NPublishingYear>\n                <NPublishingCompanyId>1</NPublishingCompanyId>\n            </request>\n        </UpdateBook>\n    </soap:Body>\n</soap:Envelope>",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdateBook xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NBookId>{{bookId}}</NBookId>\n                <CTitle>I'm a cool new updated title</CTitle>\n                <NAuthorId>2</NAuthorId>\n                <NPublishingYear>2020</NPublishingYear>\n                <NPublishingCompanyId>1</NPublishingCompanyId>\n            </request>\n        </UpdateBook>\n    </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -463,6 +620,41 @@
     },
     {
       "name": "DeleteBook",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('DeleteBookResult') || body.includes('DeleteBookResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -477,7 +669,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeleteBook xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NBookId>2000</NBookId>\n            </request>\n        </DeleteBook>\n    </soap:Body>\n</soap:Envelope>",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeleteBook xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NBookId>{{bookId}}</NBookId>\n            </request>\n        </DeleteBook>\n    </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -593,6 +785,49 @@
     },
     {
       "name": "CreateAuthor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "});",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "});",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "});",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "});",
+              "",
+              "pm.test('CreateAuthor returns a valid author ID', function () {",
+              "    const json = xml2Json(responseBody);",
+              "    const envelopeKey = Object.keys(json).find(k => k.includes('Envelope'));",
+              "    const envelope = json[envelopeKey];",
+              "    const bodyKey = Object.keys(envelope).find(k => k.includes('Body'));",
+              "    const body = envelope[bodyKey];",
+              "    const result = body['CreateAuthorResponse']['CreateAuthorResult'];",
+              "    pm.expect(result).to.exist;",
+              "    pm.expect(Number(result)).to.be.above(0);",
+              "    pm.collectionVariables.set('authorId', result);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -723,6 +958,41 @@
     },
     {
       "name": "GetAuthorById",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('GetAuthorByIdResult') || body.includes('GetAuthorByIdResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -737,7 +1007,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetAuthorById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n         <NAuthorId>511</NAuthorId>\n      </request>\n    </GetAuthorById>\n  </soap:Body>\n</soap:Envelope>\n",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetAuthorById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <NAuthorId>{{authorId}}</NAuthorId>\n      </request>\n    </GetAuthorById>\n  </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -853,6 +1123,41 @@
     },
     {
       "name": "ListAuthors",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('ListAuthorsResult') || body.includes('ListAuthorsResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -983,6 +1288,41 @@
     },
     {
       "name": "UpdateAuthor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('UpdateAuthorResult') || body.includes('UpdateAuthorResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -997,7 +1337,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdateAuthor xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NAuthorId>511</NAuthorId>\n                <CName>Ali</CName>\n                <CSurname>Mohammad</CSurname>\n            </request>\n        </UpdateAuthor>\n    </soap:Body>\n</soap:Envelope>",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdateAuthor xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NAuthorId>{{authorId}}</NAuthorId>\n                <CName>Ali</CName>\n                <CSurname>Mohammad</CSurname>\n            </request>\n        </UpdateAuthor>\n    </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -1160,6 +1500,41 @@
     },
     {
       "name": "DeleteAuthor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('DeleteAuthorResult') || body.includes('DeleteAuthorResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -1174,7 +1549,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeleteAuthor xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NAuthorId>511</NAuthorId>\n            </request>\n        </DeleteAuthor>\n    </soap:Body>\n</soap:Envelope>",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeleteAuthor xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NAuthorId>{{authorId}}</NAuthorId>\n            </request>\n        </DeleteAuthor>\n    </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -1337,6 +1712,49 @@
     },
     {
       "name": "CreatePublishingCompany",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "});",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "});",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "});",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "});",
+              "",
+              "pm.test('CreatePublishingCompany returns a valid company ID', function () {",
+              "    const json = xml2Json(responseBody);",
+              "    const envelopeKey = Object.keys(json).find(k => k.includes('Envelope'));",
+              "    const envelope = json[envelopeKey];",
+              "    const bodyKey = Object.keys(envelope).find(k => k.includes('Body'));",
+              "    const body = envelope[bodyKey];",
+              "    const result = body['CreatePublishingCompanyResponse']['CreatePublishingCompanyResult'];",
+              "    pm.expect(result).to.exist;",
+              "    pm.expect(Number(result)).to.be.above(0);",
+              "    pm.collectionVariables.set('publishingCompanyId', result);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -1467,6 +1885,41 @@
     },
     {
       "name": "GetPublishingCompanyById",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('GetPublishingCompanyByIdResult') || body.includes('GetPublishingCompanyByIdResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -1481,7 +1934,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetPublishingCompanyById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n             <NPublishingCompanyId>159</NPublishingCompanyId>\n      </request>\n    </GetPublishingCompanyById>\n  </soap:Body>\n</soap:Envelope>\n",
+          "raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <GetPublishingCompanyById xmlns=\"http://example.com/library/wsdl\">\n      <request>\n        <NPublishingCompanyId>{{publishingCompanyId}}</NPublishingCompanyId>\n      </request>\n    </GetPublishingCompanyById>\n  </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -1597,6 +2050,41 @@
     },
     {
       "name": "ListPublishingCompanies",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('ListPublishingCompaniesResult') || body.includes('ListPublishingCompaniesResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -1680,6 +2168,41 @@
     },
     {
       "name": "UpdatePublishingCompany",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('UpdatePublishingCompanyResult') || body.includes('UpdatePublishingCompanyResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -1694,7 +2217,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdatePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NPublishingCompanyId>159</NPublishingCompanyId>\n                <CName>New company name!!</CName>\n            </request>\n        </UpdatePublishingCompany>\n    </soap:Body>\n</soap:Envelope>",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <UpdatePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NPublishingCompanyId>{{publishingCompanyId}}</NPublishingCompanyId>\n                <CName>New company name!!</CName>\n            </request>\n        </UpdatePublishingCompany>\n    </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -1857,6 +2380,41 @@
     },
     {
       "name": "DeletePublishingCompany",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "})",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+              "})",
+              "",
+              "pm.test('Response is XML', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('xml');",
+              "})",
+              "",
+              "pm.test('Response has SOAP Envelope', function () {",
+              "    pm.expect(responseBody).to.include('Envelope');",
+              "})",
+              "",
+              "pm.test('No SOAP Fault in response', function () {",
+              "    pm.expect(responseBody).to.not.include('soap:Fault');",
+              "})",
+              "",
+              "pm.test('Response contains expected operation result', function () {",
+              "    pm.expect(responseBody).to.satisfy(function (body) {",
+              "        return body.includes('DeletePublishingCompanyResult') || body.includes('DeletePublishingCompanyResponse');",
+              "    });",
+              "})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -1871,7 +2429,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeletePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NPublishingCompanyId>159</NPublishingCompanyId>\n            </request>\n        </DeletePublishingCompany>\n    </soap:Body>\n</soap:Envelope>",
+          "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <DeletePublishingCompany xmlns=\"http://example.com/library/wsdl\">\n            <request>\n                <NPublishingCompanyId>{{publishingCompanyId}}</NPublishingCompanyId>\n            </request>\n        </DeletePublishingCompany>\n    </soap:Body>\n</soap:Envelope>",
           "options": {
             "raw": {
               "language": "xml"
@@ -2031,6 +2589,48 @@
           "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <error>The element or type could not be found ConflictFault</error>\n  </soap:Body>\n</soap:Envelope>\n"
         }
       ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": ""
+    },
+    {
+      "key": "bookId",
+      "value": ""
+    },
+    {
+      "key": "authorId",
+      "value": ""
+    },
+    {
+      "key": "publishingCompanyId",
+      "value": ""
     }
   ]
 }
