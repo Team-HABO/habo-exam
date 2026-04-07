@@ -1,5 +1,5 @@
 /**
- * Type definitions that describe what data can be retrieved from the schema and what mutations can be performed.
+ * Type definitions that describe what data can be retrieved from the schema and what mutations and queries can be performed.
  * This file is used by the GraphQL server to understand the structure of the data and the operations that can be performed on it.
  * It also serves as documentation for developers to understand what queries and mutations are available in the GraphQL API.
  * The type definitions are written in GraphQL SDL (Schema Definition Language)

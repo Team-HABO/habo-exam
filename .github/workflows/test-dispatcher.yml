@@ -16,7 +16,7 @@ jobs:
     secrets: inherit
 
   graph-api-tests:
-    uses: ./.github/workflows/service-graph.yml
+    uses: ./.github/workflows/graphql-api-tests.yml
     secrets: inherit
 
   grpc-api-tests:

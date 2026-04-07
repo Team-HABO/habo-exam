@@ -1,13 +1,13 @@
 import { createSchema } from "graphql-yoga";
 import { mutations } from "./schema/mutations.js";
 import { queries } from "./schema/queries.js";
-import { typeDefinitions } from "./schema/types.js";
+import { typeDefinitions } from "./schema/typeDefinitions.js";
 import { createServer } from "node:http";
 import { createYoga } from "graphql-yoga";
 import { createContext, GraphQLContext } from "./context.js";
 
 export const schema = createSchema({
-  typeDefs: [typeDefinitions],
+  typeDefs: typeDefinitions,
   resolvers: {
     Query: queries,
     Mutation: mutations,
