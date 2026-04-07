@@ -19,4 +19,6 @@ jobs:
     uses: ./.github/workflows/service-graph.yml
     secrets: inherit
 
-  #TODO: Add gRPC workflow here
+  grpc-api-tests:
+    uses: ./.github/workflows/grpc-api-tests.yml
+    secrets: inherit

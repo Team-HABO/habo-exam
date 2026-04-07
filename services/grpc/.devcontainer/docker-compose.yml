@@ -1,0 +1,9 @@
+services:
+  grpc-service:
+    container_name: grpc-service
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    volumes:
+      - ../../..:/workspace:cached
+    ports:
+      - "50051:50051"
+    command: sleep infinity

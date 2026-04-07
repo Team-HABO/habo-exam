@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package library;
+
+// The gRPC service definition — lists all RPCs clients can call
+service LibraryService {
+  // Unary RPC: client sends one request, server sends one response
+  rpc GetBookById (GetBookByIdRequest) returns (Book);
+
+  // Unary RPC: client sends book data, server returns the new ID
+  rpc CreateBook (CreateBookRequest) returns (CreateBookResponse);
+
+  // Server-streaming RPC: client subscribes, server pushes a Book each time one is created
+  rpc WatchBooks (WatchBooksRequest) returns (stream Book);
+}
+
+// --- Request/Response messages ---
+
+message GetBookByIdRequest {
+  int32 book_id = 1;
+}
+
+message CreateBookRequest {
+  string title = 1;
+  int32 author_id = 2;
+  int32 publishing_company_id = 3;
+  int32 publishing_year = 4;
+}
+
+message CreateBookResponse {
+  int32 book_id = 1;
+}
+
+message WatchBooksRequest {}
+
+// --- Data messages ---
+
+message Book {
+  int32 book_id = 1;
+  string title = 2;
+  int32 author_id = 3;
+  int32 publishing_company_id = 4;
+  int32 publishing_year = 5;
+}
