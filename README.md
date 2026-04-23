@@ -1,4 +1,4 @@
-# HABO Integration
+# HABO Exam
 
 Monorepo containing multiple API styles that implement a shared library domain.
 
