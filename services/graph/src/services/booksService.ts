@@ -17,7 +17,7 @@ export async function addBook(title: string, author: string) {
         return {
             success: false,
             message: "A book with this title and author already exists.",
-            book: null,
+            data: null,
         };
     }
 
@@ -26,6 +26,6 @@ export async function addBook(title: string, author: string) {
     return {
         success: true,
         message: "Book added successfully.",
-        book: newBook,
+        data: newBook,
     };
 }
