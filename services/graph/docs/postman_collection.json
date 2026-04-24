@@ -117,7 +117,7 @@
                   "mode": "graphql",
                   "graphql": {
                     "query": "mutation AddBook($title: String!, $author: String!) {\n  addBook(title: $title, author: $author) {\n    success\n    message\n    data {\n      id\n      title\n      author\n    }\n  }\n}",
-                    "variables": "{\n  \"title\": \"Book {{$randomWords}}\",\n  \"author\": \"Test Author\"\n}"
+                    "variables": "{\n  \"title\": \"Book {{$randomWords}} - {{$timestamp}}\",\n  \"author\": \"Test Author\"\n}"
                   }
                 },
                 "url": {
@@ -482,7 +482,7 @@
                   "mode": "graphql",
                   "graphql": {
                     "query": "mutation AddTask($title: String!) {\n  addTask(title: $title) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
-                    "variables": "{\n  \"title\": \"Task {{$randomWord}}\"\n}"
+                    "variables": "{\n  \"title\": \"Task {{$randomWord}} - {{$timestamp}}\"\n}"
                   }
                 },
                 "url": {
