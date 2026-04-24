@@ -8,7 +8,7 @@
         "generate": "graphql-codegen --config codegen.ts",
         "compile": "npm run generate && tsc",
         "start": "npm run compile && npx tsx src/server.ts",
-        "watch": "concurrently  --names \"CodeGen,TS,Nodemon\" -c \"bgYellow,bgBlue,bgMagenta\" \"graphql-codegen --watch 'src/**/*.ts'\"  \"tsc -w \" \"nodemon ./dist/src/server.js \"",
+        "watch": "concurrently  --names \"CodeGen,TS,Server\" -c \"bgYellow,bgBlue,bgMagenta\" \"graphql-codegen --watch 'src/**/*.ts'\"  \"tsc -w --noEmit\" \"nodemon --ext ts,graphql --watch src --watch generated --watch prisma --exec 'npx tsx src/server.ts'\"",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
