@@ -12,7 +12,6 @@ services:
     command: sleep infinity
     depends_on:
       - postgres
-      - pgadmin
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PW}
@@ -20,7 +19,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
 
   postgres:
-    container_name: postgres-db
+    container_name: graph-db
     image: postgres:latest
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -28,14 +27,4 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
-    restart: always
-
-  pgadmin:
-    container_name: pgadmin-browser
-    image: dpage/pgadmin4:latest
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_MAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
-    ports:
-      - "5050:80"
     restart: always

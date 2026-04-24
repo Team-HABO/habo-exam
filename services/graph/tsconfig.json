@@ -4,9 +4,11 @@
         "outDir": "dist",
         "lib": ["es2023"],
         "target": "es2023",
-        "module": "Node16",
-        "moduleResolution": "node16",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
         "esModuleInterop": true,
-        "types": ["node"]
+        "types": ["node"],
+        "strict": true,
+        "ignoreDeprecations": "6.0"
     }
 }

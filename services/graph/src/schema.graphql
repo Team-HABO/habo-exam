@@ -1,9 +1,11 @@
 type Book {
+    id: Number!
     title: String!
     author: String!
 }
 
 type Task {
+    id: Number!
     title: String!
     completed: Boolean!
 }

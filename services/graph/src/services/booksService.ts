@@ -1,6 +1,6 @@
 import { books } from "../data.js";
 
-export function getBooks(){
+export function getBooks() {
     return books;
 }
 

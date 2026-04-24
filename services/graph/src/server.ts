@@ -1,7 +1,6 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { readFileSync } from "fs";
-import { Book } from "./generated/graphql.js";
 import queries from "./resolvers/queries.js";
 import mutations from "./resolvers/mutations.js";
 
@@ -21,4 +20,4 @@ const { url } = await startStandaloneServer(server, {
     listen: { port: 4000 },
 });
 
-console.log(`🚀  Server ready at: ${url}`);
+console.log(`🚀 Server ready at: ${url}`);
