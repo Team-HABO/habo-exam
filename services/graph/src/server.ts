@@ -6,8 +6,6 @@ import mutations from "./resolvers/mutations.js";
 
 const typeDefs = readFileSync("src/schema.graphql", { encoding: "utf-8" });
 
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
 const server = new ApolloServer({
     typeDefs,
     resolvers: {
