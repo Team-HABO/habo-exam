@@ -1,14 +1,12 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions": false,
-    "strict": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src/**/*"]
+    "compilerOptions": {
+        "rootDirs": ["src"],
+        "outDir": "dist",
+        "lib": ["es2023"],
+        "target": "es2023",
+        "module": "Node16",
+        "moduleResolution": "node16",
+        "esModuleInterop": true,
+        "types": ["node"]
+    }
 }
