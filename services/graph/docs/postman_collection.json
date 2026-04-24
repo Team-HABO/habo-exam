@@ -315,7 +315,7 @@
                   "mode": "graphql",
                   "graphql": {
                     "query": "mutation AddBook($title: String!, $author: String!) {\n  addBook(title: $title, author: $author) {\n    success\n    message\n    data {\n      id\n      title\n      author\n    }\n  }\n}",
-                    "variables": "{\n  \"title\": \"Test Book\",\n  \"author\": \"Test Author\"\n}"
+                    "variables": "{\n  \"title\": \"1984\",\n  \"author\": \"George Orwell\"\n}"
                   }
                 },
                 "url": {
