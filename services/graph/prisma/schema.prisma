@@ -16,10 +16,12 @@ model Book {
   id     Int    @id @default(autoincrement())
   title  String
   author String
+
+  @@unique([title, author])
 }
 
 model Task {
   id        Int     @id @default(autoincrement())
-  title     String
+  title     String  @unique
   completed Boolean
 }

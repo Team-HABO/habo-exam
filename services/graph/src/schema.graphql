@@ -1,11 +1,11 @@
 type Book {
-    id: Number!
+    id: Int!
     title: String!
     author: String!
 }
 
 type Task {
-    id: Number!
+    id: Int!
     title: String!
     completed: Boolean!
 }
@@ -27,17 +27,16 @@ type TaskMutationResponse implements MutationResponse {
     data: Task
 }
 
-
 type Query {
     books: [Book]!
-    book(title: String!): Book
+    book(id: Int!): Book
     tasks: [Task]!
-    task(title: String!): Task
+    task(id: Int!): Task
 }
 
 type Mutation {
     addBook(title: String!, author: String!): BookMutationResponse!
     addTask(title: String!, completed: Boolean): TaskMutationResponse!
-    updateTask(title: String!, newTitle: String!, completed: Boolean!): TaskMutationResponse!
-    deleteTask(title: String!): TaskMutationResponse!
+    updateTask(id: Int!, title: String!, completed: Boolean!): TaskMutationResponse!
+    deleteTask(id: Int!): TaskMutationResponse!
 }

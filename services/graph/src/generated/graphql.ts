@@ -19,6 +19,7 @@ export type Scalars = {
 export type Book = {
   __typename?: 'Book';
   author: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
   title: Scalars['String']['output'];
 };
 
@@ -51,13 +52,13 @@ export type MutationAddTaskArgs = {
 
 
 export type MutationDeleteTaskArgs = {
-  title: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationUpdateTaskArgs = {
   completed: Scalars['Boolean']['input'];
-  newTitle: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
   title: Scalars['String']['input'];
 };
 
@@ -76,17 +77,18 @@ export type Query = {
 
 
 export type QueryBookArgs = {
-  title: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
 export type QueryTaskArgs = {
-  title: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
 };
 
 export type Task = {
   __typename?: 'Task';
   completed: Scalars['Boolean']['output'];
+  id: Scalars['Int']['output'];
   title: Scalars['String']['output'];
 };
 
@@ -180,6 +182,7 @@ export type ResolversTypes = {
   Book: ResolverTypeWrapper<Book>;
   BookMutationResponse: ResolverTypeWrapper<BookMutationResponse>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   MutationResponse: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['MutationResponse']>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
@@ -193,6 +196,7 @@ export type ResolversParentTypes = {
   Book: Book;
   BookMutationResponse: BookMutationResponse;
   Boolean: Scalars['Boolean']['output'];
+  Int: Scalars['Int']['output'];
   Mutation: Record<PropertyKey, never>;
   MutationResponse: ResolversInterfaceTypes<ResolversParentTypes>['MutationResponse'];
   Query: Record<PropertyKey, never>;
@@ -203,6 +207,7 @@ export type ResolversParentTypes = {
 
 export type BookResolvers<ContextType = any, ParentType extends ResolversParentTypes['Book'] = ResolversParentTypes['Book']> = {
   author?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
@@ -216,8 +221,8 @@ export type BookMutationResponseResolvers<ContextType = any, ParentType extends 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   addBook?: Resolver<ResolversTypes['BookMutationResponse'], ParentType, ContextType, RequireFields<MutationAddBookArgs, 'author' | 'title'>>;
   addTask?: Resolver<ResolversTypes['TaskMutationResponse'], ParentType, ContextType, RequireFields<MutationAddTaskArgs, 'title'>>;
-  deleteTask?: Resolver<ResolversTypes['TaskMutationResponse'], ParentType, ContextType, RequireFields<MutationDeleteTaskArgs, 'title'>>;
-  updateTask?: Resolver<ResolversTypes['TaskMutationResponse'], ParentType, ContextType, RequireFields<MutationUpdateTaskArgs, 'completed' | 'newTitle' | 'title'>>;
+  deleteTask?: Resolver<ResolversTypes['TaskMutationResponse'], ParentType, ContextType, RequireFields<MutationDeleteTaskArgs, 'id'>>;
+  updateTask?: Resolver<ResolversTypes['TaskMutationResponse'], ParentType, ContextType, RequireFields<MutationUpdateTaskArgs, 'completed' | 'id' | 'title'>>;
 };
 
 export type MutationResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['MutationResponse'] = ResolversParentTypes['MutationResponse']> = {
@@ -225,14 +230,15 @@ export type MutationResponseResolvers<ContextType = any, ParentType extends Reso
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  book?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<QueryBookArgs, 'title'>>;
+  book?: Resolver<Maybe<ResolversTypes['Book']>, ParentType, ContextType, RequireFields<QueryBookArgs, 'id'>>;
   books?: Resolver<Array<Maybe<ResolversTypes['Book']>>, ParentType, ContextType>;
-  task?: Resolver<Maybe<ResolversTypes['Task']>, ParentType, ContextType, RequireFields<QueryTaskArgs, 'title'>>;
+  task?: Resolver<Maybe<ResolversTypes['Task']>, ParentType, ContextType, RequireFields<QueryTaskArgs, 'id'>>;
   tasks?: Resolver<Array<Maybe<ResolversTypes['Task']>>, ParentType, ContextType>;
 };
 
 export type TaskResolvers<ContextType = any, ParentType extends ResolversParentTypes['Task'] = ResolversParentTypes['Task']> = {
   completed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
