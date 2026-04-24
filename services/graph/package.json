@@ -4,7 +4,7 @@
     "description": "",
     "main": "server.js",
     "scripts": {
-        "prepare": "npx prisma migrate && npx prisma generate",
+        "prepare": "npx prisma migrate && npx prisma generate && npx prisma db seed",
         "generate": "graphql-codegen --config codegen.ts",
         "compile": "npm run generate && tsc",
         "start": "npm run compile && npx tsx src/server.ts",

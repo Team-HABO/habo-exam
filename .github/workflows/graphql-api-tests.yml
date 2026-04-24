@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - initgraphql
     paths:
       - "services/graph/**"
   pull_request:
@@ -23,6 +22,24 @@ jobs:
   automated-api-tests:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -37,14 +54,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Prisma Validate
-        run: npx prisma validate
-
-      - name: Build check
-        run: npx tsc --noEmit
+      - name: Run database migration and seeder
+        run: npm run prepare
 
       - name: Start GraphQL Server in Background
         run: npm start &
@@ -53,4 +64,4 @@ jobs:
         run: npx wait-on http://localhost:4000/live --timeout 60000
 
       - name: Run Postman tests
-        run: npx newman run ./postman-tests/graph-api-tests.json -e ./postman-tests/graph-api-tests-env.json
+        run: npx newman run ./docs/postman-tests/postman_collection.json
