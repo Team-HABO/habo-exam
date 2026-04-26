@@ -32,11 +32,12 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
-          --health-retries 5
+          --health-cmd "pg_isready -U testuser -d testdb" --health-interval 10s
+          --health-timeout 5s --health-retries 5
 
     env:
-      CONNECTION_STRING: "Host=localhost;Port=5432;Database=testdb;Username=testuser;Password=testpassword"
+      CONNECTION_STRING: "Host=host.docker.internal;Port=5432;Database=testdb;Usernam\
+        e=testuser;Password=testpassword"
 
     steps:
       - uses: actions/checkout@v6
@@ -45,7 +46,9 @@ jobs:
         run: docker build -t soap-service .
 
       - name: Run SOAP service container
-        run: docker run -d --name soap-service -p 5292:8080 -e "CONNECTION_STRING=${{env.CONNECTION_STRING }}" soap-service
+        run: docker run -d --name soap-service -p 5292:8080
+          --add-host=host.docker.internal:host-gateway -e "CONNECTION_STRING=${{
+          env.CONNECTION_STRING }}" soap-service
 
       - name: Wait for SOAP service
         run: |
