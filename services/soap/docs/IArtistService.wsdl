@@ -1,0 +1,520 @@
+<!--
+    IArtistService WSDL Definition
+    ==============================
+    A SOAP web service for managing Artist records (CRUD operations).
+    Endpoint: http://localhost:5292/ArtistService.asmx
+    Binding:  SOAP 1.1 over HTTP (document/literal style)
+
+    Operations:
+      - ListArtists:    Retrieve all artists.
+      - GetArtistById:  Retrieve a single artist by ID.
+      - CreateArtist:   Create a new artist; returns the new artist's ID.
+      - UpdateArtist:   Update an existing artist; returns the updated record.
+      - DeleteArtist:   Delete an artist by ID; returns the deleted record.
+
+    Fault types:
+      - NotFoundFault:    Raised when the requested artist does not exist.
+      - ValidationFault:  Raised when request data fails validation.
+      - ConflictFault:    Raised when a create would produce a duplicate.
+-->
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://example.com/library/wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.microsoft.com/ws/06/2004/policy/http" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" targetNamespace="http://example.com/library/wsdl" name="IArtistService" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <!-- ====================================================================
+         TYPE DEFINITIONS
+         Inline XSD schemas defining request/response wrappers, data
+         contracts (Artist, DateOnly), and fault detail types.
+         ==================================================================== -->
+    <wsdl:types>
+        <!-- Schema 1: Operation request/response wrapper elements.
+             Each operation has a pair of elements (e.g. ListArtists / ListArtistsResponse)
+             that wrap the typed request body and result. -->
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/library/wsdl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+            <xs:import namespace="http://schemas.datacontract.org/2004/07/soap.Models" />
+            <xs:import namespace="http://schemas.datacontract.org/2004/07/System" />
+
+            <!-- ListArtists: request wrapper — contains a GetArtists request (empty body). -->
+            <xs:element name="ListArtists">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="request" nillable="true" type="tns:GetArtists" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <!-- ListArtistsResponse: returns an ArrayOfArtist (zero or more Artist records). -->
+            <xs:element name="ListArtistsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="ListArtistsResult" nillable="true" xmlns:q1="http://schemas.datacontract.org/2004/07/soap.Models" type="q1:ArrayOfArtist" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- GetArtistById: request wrapper — contains a GetArtistById request with an ArtistId. -->
+            <xs:element name="GetArtistById">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="request" nillable="true" type="tns:GetArtistById" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <!-- GetArtistByIdResponse: returns a single Artist record. -->
+            <xs:element name="GetArtistByIdResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="GetArtistByIdResult" nillable="true" xmlns:q2="http://schemas.datacontract.org/2004/07/soap.Models" type="q2:Artist" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- CreateArtist: request wrapper — contains FirstName, LastName, Gender, DateOfBirth. -->
+            <xs:element name="CreateArtist">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="request" nillable="true" type="tns:CreateArtist" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <!-- CreateArtistResponse: returns the newly created artist's integer ID. -->
+            <xs:element name="CreateArtistResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="CreateArtistResult" type="xs:int" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- UpdateArtist: request wrapper — requires ArtistId plus fields to update. -->
+            <xs:element name="UpdateArtist">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="request" nillable="true" type="tns:UpdateArtist" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <!-- UpdateArtistResponse: returns the full updated Artist record. -->
+            <xs:element name="UpdateArtistResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="UpdateArtistResult" nillable="true" xmlns:q3="http://schemas.datacontract.org/2004/07/soap.Models" type="q3:Artist" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- DeleteArtist: request wrapper — identifies the artist to delete by ArtistId. -->
+            <xs:element name="DeleteArtist">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="request" nillable="true" type="tns:DeleteArtist" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <!-- DeleteArtistResponse: returns the Artist record that was deleted. -->
+            <xs:element name="DeleteArtistResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="1" name="DeleteArtistResult" nillable="true" xmlns:q4="http://schemas.datacontract.org/2004/07/soap.Models" type="q4:Artist" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <!-- Schema 2: Microsoft DataContract serialization primitives.
+             Standard primitive type elements and custom simple types (char, duration, guid)
+             used by the WCF/CoreWCF serialization infrastructure. -->
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/">
+            <xs:element name="anyType" nillable="true" type="xs:anyType" />
+            <xs:element name="anyURI" nillable="true" type="xs:anyURI" />
+            <xs:element name="base64Binary" nillable="true" type="xs:base64Binary" />
+            <xs:element name="boolean" nillable="true" type="xs:boolean" />
+            <xs:element name="byte" nillable="true" type="xs:byte" />
+            <xs:element name="dateTime" nillable="true" type="xs:dateTime" />
+            <xs:element name="decimal" nillable="true" type="xs:decimal" />
+            <xs:element name="double" nillable="true" type="xs:double" />
+            <xs:element name="float" nillable="true" type="xs:float" />
+            <xs:element name="int" nillable="true" type="xs:int" />
+            <xs:element name="long" nillable="true" type="xs:long" />
+            <xs:element name="QName" nillable="true" type="xs:QName" />
+            <xs:element name="short" nillable="true" type="xs:short" />
+            <xs:element name="string" nillable="true" type="xs:string" />
+            <xs:element name="unsignedByte" nillable="true" type="xs:unsignedByte" />
+            <xs:element name="unsignedInt" nillable="true" type="xs:unsignedInt" />
+            <xs:element name="unsignedLong" nillable="true" type="xs:unsignedLong" />
+            <xs:element name="unsignedShort" nillable="true" type="xs:unsignedShort" />
+            <xs:element name="char" nillable="true" type="tns:char" />
+            <xs:simpleType name="char">
+                <xs:restriction base="xs:int" />
+            </xs:simpleType>
+            <xs:element name="duration" nillable="true" type="tns:duration" />
+            <xs:simpleType name="duration">
+                <xs:restriction base="xs:duration">
+                    <xs:pattern value="\-?P(\d*D)?(T(\d*H)?(\d*M)?(\d*(\.\d*)?S)?)?" />
+                    <xs:minInclusive value="-P10675199DT2H48M5.4775808S" />
+                    <xs:maxInclusive value="P10675199DT2H48M5.4775807S" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:element name="guid" nillable="true" type="tns:guid" />
+            <xs:simpleType name="guid">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:attribute name="FactoryType" type="xs:QName" />
+            <xs:attribute name="Id" type="xs:ID" />
+            <xs:attribute name="Ref" type="xs:IDREF" />
+        </xs:schema>
+        <!-- Schema 3: Request/response data-contract types and fault detail types.
+             Defines the typed bodies carried inside the wrapper elements from Schema 1. -->
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/library/wsdl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://example.com/library/wsdl" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+            <xs:import namespace="http://schemas.datacontract.org/2004/07/System" />
+            <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+
+            <!-- GetArtists: empty request body — no filtering parameters. -->
+            <xs:complexType name="GetArtists" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence />
+            </xs:complexType>
+            <xs:element name="GetArtists" nillable="true" type="tns:GetArtists" />
+
+            <!-- GetArtistById: requires the integer ArtistId to look up. -->
+            <xs:complexType name="GetArtistById" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="1" name="ArtistId" type="xs:int" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="GetArtistById" nillable="true" type="tns:GetArtistById" />
+
+            <!-- CreateArtist: all fields required — FirstName, LastName, Gender, DateOfBirth. -->
+            <xs:complexType name="CreateArtist" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="1" name="FirstName" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="1" name="LastName" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="1" name="Gender" nillable="true" type="xs:string" />
+                    <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/System" minOccurs="1" name="DateOfBirth" type="q1:DateOnly" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="CreateArtist" nillable="true" type="tns:CreateArtist" />
+
+            <!-- UpdateArtist: ArtistId, FirstName, LastName, Gender required;
+                 DateOfBirth is optional (minOccurs="0"). -->
+            <xs:complexType name="UpdateArtist" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="1" name="ArtistId" type="xs:int" />
+                    <xs:element minOccurs="1" name="FirstName" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="1" name="LastName" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="1" name="Gender" nillable="true" type="xs:string" />
+                    <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/System" minOccurs="0" name="DateOfBirth" type="q2:DateOnly" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="UpdateArtist" nillable="true" type="tns:UpdateArtist" />
+
+            <!-- DeleteArtist: only requires the ArtistId of the record to remove. -->
+            <xs:complexType name="DeleteArtist" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="1" name="ArtistId" type="xs:int" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="DeleteArtist" nillable="true" type="tns:DeleteArtist" />
+
+            <!-- NotFoundFault: fault detail returned when the target artist does not exist.
+                 Contains an optional ErrorCode and ErrorMessage. -->
+            <xs:complexType name="NotFoundFault" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="ErrorMessage" nillable="true" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="NotFoundFault" nillable="true" type="tns:NotFoundFault" />
+
+            <!-- ValidationFault: fault detail returned when input data fails validation.
+                 Contains an optional ErrorCode and ErrorMessage. -->
+            <xs:complexType name="ValidationFault" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="ErrorMessage" nillable="true" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="ValidationFault" nillable="true" type="tns:ValidationFault" />
+
+            <!-- ConflictFault: fault detail returned when a create would duplicate an existing record.
+                 Contains an optional ErrorCode and ErrorMessage. -->
+            <xs:complexType name="ConflictFault" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="ErrorMessage" nillable="true" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="ConflictFault" nillable="true" type="tns:ConflictFault" />
+        </xs:schema>
+        <!-- Schema 4: Artist domain model and collection type.
+             Maps to the soap.Models.Artist entity. -->
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/soap.Models" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.datacontract.org/2004/07/soap.Models" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+            <xs:import namespace="http://schemas.datacontract.org/2004/07/System" />
+            <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+
+            <!-- Artist: the core domain entity.
+                 Fields: Id (int), FirstName, LastName, Gender (strings), DateOfBirth (DateOnly). -->
+            <xs:complexType name="Artist" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/System" minOccurs="0" name="DateOfBirth" type="q1:DateOnly" />
+                    <xs:element minOccurs="0" name="FirstName" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="Gender" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="Id" type="xs:int" />
+                    <xs:element minOccurs="0" name="LastName" nillable="true" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="Artist" nillable="true" type="tns:Artist" />
+
+            <!-- ArrayOfArtist: a collection of zero or more Artist elements. -->
+            <xs:complexType name="ArrayOfArtist" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="unbounded" name="Artist" nillable="true" type="tns:Artist" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="ArrayOfArtist" nillable="true" type="tns:ArrayOfArtist" />
+        </xs:schema>
+        <!-- Schema 5: System types — DateOnly and DayOfWeek.
+             Represents .NET System.DateOnly as a complex type with Day, Month, Year, etc. -->
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/System" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.datacontract.org/2004/07/System" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+            <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+
+            <!-- DateOnly: a date-without-time value type (maps to System.DateOnly).
+                 Key fields for consumers: Year, Month, Day. -->
+            <xs:complexType name="DateOnly" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/">
+                <xs:annotation>
+                    <xs:appinfo>
+                        <ser:IsValueType>true</ser:IsValueType>
+                    </xs:appinfo>
+                </xs:annotation>
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="Day" type="xs:int" />
+                    <xs:element minOccurs="0" name="DayNumber" type="xs:int" />
+                    <xs:element type="tns:DayOfWeek" name="DayOfWeek" />
+                    <xs:element minOccurs="0" name="DayOfYear" type="xs:int" />
+                    <xs:element minOccurs="0" name="MaxValue" type="tns:DateOnly" />
+                    <xs:element minOccurs="0" name="MinValue" type="tns:DateOnly" />
+                    <xs:element minOccurs="0" name="Month" type="xs:int" />
+                    <xs:element minOccurs="0" name="Year" type="xs:int" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="DateOnly" nillable="true" type="tns:DateOnly" />
+
+            <!-- DayOfWeek: enumeration of weekday names (Sunday through Saturday). -->
+            <xs:simpleType name="DayOfWeek">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Sunday" />
+                    <xs:enumeration value="Monday" />
+                    <xs:enumeration value="Tuesday" />
+                    <xs:enumeration value="Wednesday" />
+                    <xs:enumeration value="Thursday" />
+                    <xs:enumeration value="Friday" />
+                    <xs:enumeration value="Saturday" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:element name="DayOfWeek" type="tns:DayOfWeek" />
+        </xs:schema>
+        <!-- Schema 6: Serialization arrays namespace (empty — imported by other schemas). -->
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/" elementFormDefault="qualified" targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+            <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+        </xs:schema>
+    </wsdl:types>
+
+    <!-- ====================================================================
+         MESSAGES
+         Each operation defines an input message, an output message, and one
+         or more fault messages.  Messages reference the wrapper elements
+         defined in Schema 1 above.
+         ==================================================================== -->
+
+    <!-- ListArtists messages -->
+    <wsdl:message name="IArtistService_ListArtists_InputMessage">
+        <wsdl:part name="parameters" element="tns:ListArtists" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_ListArtists_OutputMessage">
+        <wsdl:part name="parameters" element="tns:ListArtistsResponse" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_ListArtists_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q1:NotFoundFault" xmlns:q1="http://example.com/library/wsdl" />
+    </wsdl:message>
+
+    <!-- GetArtistById messages -->
+    <wsdl:message name="IArtistService_GetArtistById_InputMessage">
+        <wsdl:part name="parameters" element="tns:GetArtistById" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_GetArtistById_OutputMessage">
+        <wsdl:part name="parameters" element="tns:GetArtistByIdResponse" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_GetArtistById_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q2:NotFoundFault" xmlns:q2="http://example.com/library/wsdl" />
+    </wsdl:message>
+
+    <!-- CreateArtist messages (includes ValidationFault and ConflictFault) -->
+    <wsdl:message name="IArtistService_CreateArtist_InputMessage">
+        <wsdl:part name="parameters" element="tns:CreateArtist" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_CreateArtist_OutputMessage">
+        <wsdl:part name="parameters" element="tns:CreateArtistResponse" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_CreateArtist_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q3:ValidationFault" xmlns:q3="http://example.com/library/wsdl" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_CreateArtist_ConflictFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q4:ConflictFault" xmlns:q4="http://example.com/library/wsdl" />
+    </wsdl:message>
+
+    <!-- UpdateArtist messages (includes ValidationFault and NotFoundFault) -->
+    <wsdl:message name="IArtistService_UpdateArtist_InputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateArtist" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_UpdateArtist_OutputMessage">
+        <wsdl:part name="parameters" element="tns:UpdateArtistResponse" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_UpdateArtist_ValidationFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q5:ValidationFault" xmlns:q5="http://example.com/library/wsdl" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_UpdateArtist_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q6:NotFoundFault" xmlns:q6="http://example.com/library/wsdl" />
+    </wsdl:message>
+
+    <!-- DeleteArtist messages -->
+    <wsdl:message name="IArtistService_DeleteArtist_InputMessage">
+        <wsdl:part name="parameters" element="tns:DeleteArtist" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_DeleteArtist_OutputMessage">
+        <wsdl:part name="parameters" element="tns:DeleteArtistResponse" />
+    </wsdl:message>
+    <wsdl:message name="IArtistService_DeleteArtist_NotFoundFaultFault_FaultMessage">
+        <wsdl:part name="detail" element="q7:NotFoundFault" xmlns:q7="http://example.com/library/wsdl" />
+    </wsdl:message>
+
+    <!-- ====================================================================
+         PORT TYPE (Service Interface)
+         Defines the abstract operations exposed by IArtistService, along
+         with the input, output, and fault messages for each operation.
+         ==================================================================== -->
+    <wsdl:portType name="IArtistService">
+        <!-- ListArtists: Retrieve all artists. Faults with NotFoundFault if none exist. -->
+        <wsdl:operation name="ListArtists">
+            <wsdl:input wsam:Action="http://example.com/library/wsdl/IArtistService/ListArtists" message="tns:IArtistService_ListArtists_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/IArtistService/ListArtistsResponse" message="tns:IArtistService_ListArtists_OutputMessage" />
+            <wsdl:fault wsam:Action="http://example.com/library/wsdl/IArtistService/ListArtistsNotFoundFaultFault" name="NotFoundFaultFault" message="tns:IArtistService_ListArtists_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+
+        <!-- GetArtistById: Retrieve a single artist by their unique ID.
+             Faults with NotFoundFault if the ID does not match any record. -->
+        <wsdl:operation name="GetArtistById">
+            <wsdl:input wsam:Action="http://example.com/library/wsdl/IArtistService/GetArtistById" message="tns:IArtistService_GetArtistById_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/IArtistService/GetArtistByIdResponse" message="tns:IArtistService_GetArtistById_OutputMessage" />
+            <wsdl:fault wsam:Action="http://example.com/library/wsdl/IArtistService/GetArtistByIdNotFoundFaultFault" name="NotFoundFaultFault" message="tns:IArtistService_GetArtistById_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+
+        <!-- CreateArtist: Add a new artist record.
+             Faults: ValidationFault on invalid data, ConflictFault on duplicate. -->
+        <wsdl:operation name="CreateArtist">
+            <wsdl:input wsam:Action="http://example.com/library/wsdl/IArtistService/CreateArtist" message="tns:IArtistService_CreateArtist_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/IArtistService/CreateArtistResponse" message="tns:IArtistService_CreateArtist_OutputMessage" />
+            <wsdl:fault wsam:Action="http://example.com/library/wsdl/IArtistService/CreateArtistValidationFaultFault" name="ValidationFaultFault" message="tns:IArtistService_CreateArtist_ValidationFaultFault_FaultMessage" />
+            <wsdl:fault wsam:Action="http://example.com/library/wsdl/IArtistService/CreateArtistConflictFaultFault" name="ConflictFaultFault" message="tns:IArtistService_CreateArtist_ConflictFaultFault_FaultMessage" />
+        </wsdl:operation>
+
+        <!-- UpdateArtist: Modify an existing artist's data.
+             Faults: ValidationFault on invalid data, NotFoundFault if the artist doesn't exist. -->
+        <wsdl:operation name="UpdateArtist">
+            <wsdl:input wsam:Action="http://example.com/library/wsdl/IArtistService/UpdateArtist" message="tns:IArtistService_UpdateArtist_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/IArtistService/UpdateArtistResponse" message="tns:IArtistService_UpdateArtist_OutputMessage" />
+            <wsdl:fault wsam:Action="http://example.com/library/wsdl/IArtistService/UpdateArtistValidationFaultFault" name="ValidationFaultFault" message="tns:IArtistService_UpdateArtist_ValidationFaultFault_FaultMessage" />
+            <wsdl:fault wsam:Action="http://example.com/library/wsdl/IArtistService/UpdateArtistNotFoundFaultFault" name="NotFoundFaultFault" message="tns:IArtistService_UpdateArtist_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+
+        <!-- DeleteArtist: Remove an artist by ID.
+             Faults with NotFoundFault if the artist doesn't exist. -->
+        <wsdl:operation name="DeleteArtist">
+            <wsdl:input wsam:Action="http://example.com/library/wsdl/IArtistService/DeleteArtist" message="tns:IArtistService_DeleteArtist_InputMessage" />
+            <wsdl:output wsam:Action="http://example.com/library/wsdl/IArtistService/DeleteArtistResponse" message="tns:IArtistService_DeleteArtist_OutputMessage" />
+            <wsdl:fault wsam:Action="http://example.com/library/wsdl/IArtistService/DeleteArtistNotFoundFaultFault" name="NotFoundFaultFault" message="tns:IArtistService_DeleteArtist_NotFoundFaultFault_FaultMessage" />
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- ====================================================================
+         BINDING
+         Concrete SOAP 1.1 binding using BasicHttpBinding over HTTP.
+         All operations use document/literal style with literal encoding.
+         ==================================================================== -->
+    <wsdl:binding name="BasicHttpBinding_IArtistService" type="tns:IArtistService">
+        <!-- SOAP 1.1 transport over HTTP -->
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="ListArtists">
+            <soap:operation soapAction="http://example.com/library/wsdl/IArtistService/ListArtists" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault">
+                <soap:fault use="literal" name="NotFoundFaultFault" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="GetArtistById">
+            <soap:operation soapAction="http://example.com/library/wsdl/IArtistService/GetArtistById" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault">
+                <soap:fault use="literal" name="NotFoundFaultFault" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="CreateArtist">
+            <soap:operation soapAction="http://example.com/library/wsdl/IArtistService/CreateArtist" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="ValidationFaultFault">
+                <soap:fault use="literal" name="ValidationFaultFault" />
+            </wsdl:fault>
+            <wsdl:fault name="ConflictFaultFault">
+                <soap:fault use="literal" name="ConflictFaultFault" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="UpdateArtist">
+            <soap:operation soapAction="http://example.com/library/wsdl/IArtistService/UpdateArtist" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="ValidationFaultFault">
+                <soap:fault use="literal" name="ValidationFaultFault" />
+            </wsdl:fault>
+            <wsdl:fault name="NotFoundFaultFault">
+                <soap:fault use="literal" name="NotFoundFaultFault" />
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="DeleteArtist">
+            <soap:operation soapAction="http://example.com/library/wsdl/IArtistService/DeleteArtist" style="document" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+            <wsdl:fault name="NotFoundFaultFault">
+                <soap:fault use="literal" name="NotFoundFaultFault" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ====================================================================
+         SERVICE
+         Publishes the IArtistService at the specified endpoint URL.
+         ==================================================================== -->
+    <wsdl:service name="IArtistService">
+        <wsdl:port name="BasicHttpBinding_IArtistService" binding="tns:BasicHttpBinding_IArtistService">
+            <soap:address location="http://localhost:5292/ArtistService.asmx" />
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
