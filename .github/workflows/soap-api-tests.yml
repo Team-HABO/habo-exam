@@ -8,25 +8,49 @@ on:
       - main
     paths:
       - "services/soap/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "services/soap/**"
+
+defaults:
+  run:
+    working-directory: services/soap
 
 jobs:
   automated-soap-api-tests:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CONNECTION_STRING: "Host=localhost;Port=5432;Database=testdb;Username=testuser;Password=testpassword"
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build Docker image
-        working-directory: services/soap
         run: docker build -t soap-service .
 
       - name: Run SOAP service container
-        run: docker run -d --name soap-service -p 8080:8080 soap-service
+        run: docker run -d --name soap-service -p 5292:8080 -e "CONNECTION_STRING=${{env.CONNECTION_STRING }}" soap-service
 
       - name: Wait for SOAP service
         run: |
           for i in {1..15}; do
-            if curl -sSf http://localhost:8080/health > /dev/null; then
+            if curl -sSf http://localhost:5292/health > /dev/null; then
               echo "SOAP service is ready"
               exit 0
             fi
@@ -40,11 +64,6 @@ jobs:
         run: |
           curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
 
-      - name: Login to Postman CLI
-        run: postman login --with-api-key ${{ secrets.SOAP_POSTMAN_API_KEY }}
-
       - name: Run API tests
         run: |
-          postman collection run "53145194-b2dddcee-253f-4604-b29a-8724ed451bd1" \
-            --env-var "baseURL=localhost:8080"
-
+          postman collection run ./docs/soap.postman_collection.json
