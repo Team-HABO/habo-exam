@@ -1,168 +1,89 @@
-# REST Library Service
+# REST Movie Service
 
-REST API for managing books, authors, and publishers.
+REST API for managing movies, direcotrs and production companies
 
-## Requirements Coverage
+## Endpoints
+ - Movies: GetAll, GetByID, Create, Update and Delete
+ - Movies: GetAll, GetByID
+ - Movies: GetAll, GetByID
+GetAll uses pagination
 
-Implemented endpoints:
-
-- Books: create, read by ID, list with pagination, update, delete
-- Authors: create, read by ID, list all, update, delete
-- Publishers: create, read by ID, list all, update, delete
-
-API tests are available in Postman collection format in [docs/postman-collection.json](docs/postman-collection.json).
 
 ## Tech Stack
+ASP.NET
+SQLite db file
+Entity Framework Core as ORM
 
-- Node.js + TypeScript
-- Express
-- Prisma
-- PostgreSQL
-- Vitest
-
-## Prerequisites
-
-- Docker
-
-## Getting Started
-
-1. Create a devcontainer environment file from the template:
-
+## Run with docker
 ```bash
-cd services/rest/.devcontainer
-cp .env-sample .env
+cd services/rest
+docker compose up -d
 ```
 
-2. Fill in the values in `.env`:
+### SQL Injection
+EF Core protects from SQL injection because it uses parameterized queries under the hood, so user input is never treated as raw SQL.
 
-- `POSTGRES_USER`
-- `POSTGRES_PW`
-- `POSTGRES_DB`
-- `PGADMIN_MAIL`
-- `PGADMIN_PW`
+### CRSF
+An attacker tricks a user’s browser into sending a request to another website
+For modern APIs that store API keys in headers or use OAuth CSRF is not a problem
 
-`DATABASE_URL` is already templated in `.env-sample`.
+### XSS (Cross-Site Scripting)
+The XSS process
+1. An attacker injects HTML or JavaScript code in a website
+2. The website will make a subsequent API call passing the code as a parameter
+    • It could be a link, so that the code could even reside in another website
+3. The code will be executed by the API server at some point
+We sanitize input using /rest/Middleware/XssMiddleware.cs
+Middleware is applied in program.cs with app.UseMiddleware<XssMiddleware>();
+Content-Security-Policy (CSP) header is added to every response, tells the browser which resources (scripts, styles, images) are allowed to be loaded and executed on a specific page
+How CSP header protects against XSS
 
-3. Start the dev container:
+XSS works by tricking a browser into executing malicious code. CSP prevents this in three main ways:
+1. Blocking Inline Scripts
 
-Use VS Code command palette and run:
+By default, a strong CSP blocks "inline" scripts—code written directly inside <script> tags or HTML attributes (like onclick).
 
-- `Dev Containers: Reopen in Container`
+    The Attack: An attacker stores <script>alert('xss')</script> in your database.
 
-This starts the services defined in `.devcontainer/docker-compose.yml` (Node, Postgres, pgAdmin).
+    The Protection: Even if the browser renders that tag, the CSP says "I don't allow inline scripts," and the browser ignores it.
 
-4. Install dependencies inside the container:
+2. Restricting Trusted Domains
 
-```bash
-npm i
-```
+If you do need scripts, you can specify exactly where they come from.
 
-5. Generate Prisma client, apply migrations, and seed:
+    The Attack: An attacker tries to load a malicious file: <script src="https://evil-hacker.com/steal.js"></script>.
 
-```bash
-npm run prepare
-```
+    The Protection: Your CSP might say script-src 'self'. The browser checks the source, sees it isn't from your domain, and blocks the request.
 
-6. Start the service:
+3. Disabling eval()
 
-```bash
-npm start
-```
+CSP prevents the use of eval(), which turns strings into executable code. This closes a major loophole used by hackers to sneak scripts past basic filters.
 
-Server runs on `http://localhost:3000`.
+default-src 'none': Allow nothing but HTML unless explicitly allowed (no scripts, CSS, images, API calls, fonts, WebSocket connections, etc.)
 
-## Scripts
+frame-ancestors 'none': Prevent the API from being embedded (e.g., <iframe>, <embed>)
 
-- `npm start`: run the API (`tsx src/server.ts`)
-- `npm run prepare`: generate client, run migrations, seed DB
-- `npm test`: run tests once with coverage
-- `npm run test:watch`: run tests in watch mode
-- `npm run lint`: run ESLint
+base-uri 'none': Prevent relative links to resolve to an attacker domain (e.g., by using a <base href="https://evil.com"> tag
 
-## API Base URL
 
-`http://localhost:3000`
+### Version strategy
+This API is using URI versioning, meaning the version is in the path api/v1/movies
 
-## Endpoint Summary
+### CORS
+CORS is cinfigured in program.cs where it allows any method from client "http://localhost:3000"
+CORS is applied in program.cs with app.UseCors("AllowFrontend");
 
-### Authors
 
-- `GET /authors`
-- `POST /authors`
-- `GET /authors/:id`
-- `PUT /authors/:id`
-- `DELETE /authors/:id`
+### to do
+.gitignore?
 
-Create/Update payload:
-
-```json
-{
-	"name": "John",
-	"surname": "Doe"
-}
-```
-
-### Publishers
-
-- `GET /publishers`
-- `POST /publishers`
-- `GET /publishers/:id`
-- `PUT /publishers/:id`
-- `DELETE /publishers/:id`
-
-Create/Update payload:
-
-```json
-{
-	"name": "Penguin Books"
-}
-```
-
-### Books
-
-- `GET /books`
-- `POST /books`
-- `GET /books/:id`
-- `PUT /books/:id`
-- `DELETE /books/:id`
-
-Create/Update payload:
-
-```json
-{
-	"title": "Clean Code",
-	"publishingYear": 2008,
-	"authorId": 1,
-	"publishingCompanyId": 1
-}
-```
-
-Pagination for `GET /books`:
-
-- Query params used by current implementation: `pageNum`, `pageSize`
-- Example: `/books?pageNum=1&pageSize=10`
-- Offset behavior is derived as `(pageNum - 1) * pageSize`
-
-## Response Codes
-
-- `200 OK`: successful reads/updates
-- `201 Created`: successful create
-- `204 No Content`: successful delete
-- `400 Bad Request`: invalid or missing required fields
-- `404 Not Found`: resource does not exist
-
-## Testing
-
-### Automated tests
-
-```bash
-npm test
-```
-
-### Postman collection
-
-Import [docs/postman-collection.json](docs/postman-collection.json) and set:
-
-- `baseUrl` to `http://localhost:3000`
-
-Then run the collection.
+OAuth2
+JWT
+what endpoint should have Authorize
+In Arturos powerpoint he mentions filtering not search
+Choose a revocation strategy - i think blacklist because then the api is still stateless
+HATEOAS on getall?
+OpenAPI documentation 
+postman tests
+CI pipeline
+Finnish readme
