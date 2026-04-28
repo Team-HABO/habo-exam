@@ -1,35 +1,34 @@
 {
-	"name": "Rest Service",
+	"name": "REST Service",
 	"dockerComposeFile": "docker-compose.yml",
-	"service": "node",
-	"workspaceFolder": "/workspace",
-	"shutdownAction": "stopCompose",
+	"service": "rest-service",
+	"workspaceFolder": "/workspace/services/rest",
+	"forwardPorts": [5286],
+	"portsAttributes": {
+		"5286": {
+			"label": "REST API",
+			"onAutoForward": "notify"
+		}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"aaron-bond.better-comments",
-				"usernamehw.errorlens",
-				"deinsoftware.vitest-snippets",
-				"vitest.explorer",
-				"yoavbls.pretty-ts-errors",
-				"prisma.prisma",
-				"esbenp.prettier-vscode",
-				"cweijan.dbclient-jdbc",
-				"cweijan.vscode-database-client2"
-			]
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.csharp",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-azuretools.vscode-docker",
+				"eamodio.gitlens",
+				"humao.rest-client",
+				"redhat.vscode-xml",
+				"EditorConfig.EditorConfig"
+			],
+			"settings": {
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": "ms-dotnettools.csharp",
+				"dotnet.defaultSolution": "rest.slnx",
+				"terminal.integrated.defaultProfile.linux": "bash"
+			}
 		}
 	},
-	"features": {
-		"ghcr.io/devcontainers/features/common-utils": {
-			"installZsh": true,
-			"installOhMyZsh": true,
-			"installOhMyZshConfig": true,
-			"configureZshAsDefaultShell": true
-		},
-		"ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
-			"plugins": "zsh-autosuggestions zsh-syntax-highlighting fast-syntax-highlighting",
-			"omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git https://github.com/zdharma-continuum/fast-syntax-highlighting.git"
-		}
-	},
-	"forwardPorts": [5432, 5050, 3000]
+	"postCreateCommand": "dotnet restore"
 }
