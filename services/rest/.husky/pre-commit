@@ -1,3 +1,0 @@
-echo "RUNNING HUSKY PRE-COMMIT"
-npx eslint .
-npm test
