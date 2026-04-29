@@ -1,12 +1,41 @@
 services:
   soap-service:
     container_name: soap-service
-    image: mcr.microsoft.com/devcontainers/dotnet:9.0
+    image: mcr.microsoft.com/devcontainers/dotnet:10.0
     volumes:
       # Mounts the project folder to '/workspace'. The target path inside the container
       # should match what your application expects. In this case, the compose file is
       # in a sub-folder, so you will mount '..'. You would then reference this path as the
       # 'workspaceFolder' in '.devcontainer/devcontainer.json' so VS Code starts here.
-      - ../../..:/workspace:cached
+      - ..:/workspace:cached
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
+    depends_on:
+      - postgres
+      - pgadmin
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - CONNECTION_STRING=${CONNECTION_STRING}
+
+  postgres:
+    container_name: soap-db
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    restart: always
+
+  pgadmin:
+    container_name: soap-pgadmin-browser
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_MAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
+    ports:
+      - "5050:80"
+    restart: always

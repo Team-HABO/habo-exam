@@ -3,20 +3,29 @@ using soap.Data;
 using soap.Services;
 using SoapCore;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Register SQLite + EF Core
+// Register PostgreSQL + EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=data/library.db"));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? throw new Exception("CONNECTION_STRING not defined")));
 
 // Register SoapCore and the library service implementation
 builder.Services.AddSoapCore();
-builder.Services.AddScoped<ILibraryService, LibraryService>();
+builder.Services.AddScoped<IArtistService, ArtistService>();
 
 var app = builder.Build();
 
+// Apply migrations and seed data
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbSeeder.Seed(db);
+}
+
 // Register the SOAP endpoint
-app.UseSoapEndpoint<ILibraryService>("/LibraryService.asmx", new SoapEncoderOptions());
+app.UseSoapEndpoint<IArtistService>("/ArtistService.asmx", new SoapEncoderOptions());
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok("healthy"));
