@@ -1,160 +1,102 @@
-Made by following tutorial using typescript, yoga graphql, prisma and sqlite:
-https://the-guild.dev/graphql/yoga-server/tutorial/basic
+# Graph Service
+
+A GraphQL API built with **Apollo Server** and **Prisma ORM** for managing books and tasks over a PostgreSQL database.
 
 ## Tech Stack
 
-    Runtime: Node.js
+- [Apollo Server](https://www.apollographql.com/docs/apollo-server/) v5
+- [Prisma](https://www.prisma.io/) v7 (PostgreSQL)
+- [GraphQL Codegen](https://the-guild.dev/graphql/codegen) for TypeScript type generation
+- TypeScript, Node.js
 
-    Language: TypeScript
+## Prerequisites
 
-    Server: GraphQL Yoga
-
-    ORM: Prisma
-
-    Database: SQLite
-
-    Execution: tsx
-
-## Features
-
-The API supports the following operations at the /graphql endpoint:
-Queries
-
-    books: List all registered books.
-
-    book(id: ID!): Fetch a specific book by its ID.
-
-    authors: List all registered authors.
-
-    publishers: List all registered publishing companies.
-
-Mutations
-
-    Books: Create, Update (all fields), and Delete.
-
-    Authors: Create, Update (all fields), and Delete.
-
-    Publishers: Create, Update (all fields), and Delete.
+- Docker
+- vscode
 
 ## Getting Started
 
-1. Installation
+Start your dev container by first filling out the `.env`
 
-Bash
+```bash
+cp .devcontainer/.env-sample .devcontainer/.env
+```
 
-cd .\services\graph\
+Open the folder in VS Code and run
 
+```
+Dev Containers: Reopen in Container
+```
+
+Once inside the container, run:
+
+```bash
 npm install
+npm run prepare   # Run migrations, generate Prisma client, seed database
+npm run start     # Generate types, compile, and start the server
+```
 
-2. Database Setup
+The server starts on **http://localhost:4000**.
 
-Ensure your Prisma schema is synced with your SQLite database:
-Bash
+### Development
 
-npx prisma generate
-npx prisma db push
+```bash
+npm run watch
+```
 
-3. Running the Project
+Runs code generation, type checking, and the server concurrently with live reload.
 
-To start the development server with hot-reload:
-Bash
+## Database Models
 
-npm run dev
+| Model    | Fields                     | Constraints                   |
+| -------- | -------------------------- | ----------------------------- |
+| **Book** | `id`, `title`, `author`    | Unique on (`title`, `author`) |
+| **Task** | `id`, `title`, `completed` | Unique on `title`             |
 
-The server will be available at http://localhost:4000/graphql, where you can use the built-in GraphiQL interface to test queries.
+## API
 
-## Testing with postman collection
+### Queries
 
-npm install -g newman
+| Query   | Arguments  | Return    |
+| ------- | ---------- | --------- |
+| `books` | —          | `[Book]!` |
+| `book`  | `id: Int!` | `Book`    |
+| `tasks` | —          | `[Task]!` |
+| `task`  | `id: Int!` | `Task`    |
 
-npx newman run ./postman-tests/graph-api-tests.json -e ./postman-tests/graph-api-tests-env.json  
+### Mutations
 
-## Testing in yoga UI:
+| Mutation     | Arguments                                           | Return                  |
+| ------------ | --------------------------------------------------- | ----------------------- |
+| `addBook`    | `title: String!`, `author: String!`                 | `BookMutationResponse!` |
+| `addTask`    | `title: String!`, `completed: Boolean`              | `TaskMutationResponse!` |
+| `updateTask` | `id: Int!`, `title: String!`, `completed: Boolean!` | `TaskMutationResponse!` |
+| `deleteTask` | `id: Int!`                                          | `TaskMutationResponse!` |
 
-query GetBooks {
-    books {
-        bookId
-        title
-        authorId
-        publishingYear
-        publishingCompanyId
-    }
-}
-query GetBookById {
-    book(bookId: 1006) {
-        title
-    }
-}
-query GetAuthors {
-    authors {
-        authorId
-        firstName
-        lastName
-    }
-}
-query GetPublishers {
-    publishers {
-        publishingCompanyId
-        name
-    }
-}
-mutation CreateNewBook {
-    addBook(
-    title: "Harry Potter and the Goblet of Fire!!",
-    authorId: 394,
-    publishingYear: 2000,
-    publishingCompanyId: 74) {
-        bookId
-        title
-        publishingYear
-    }
-}
-mutation CreateNewAuthor {
-    addAuthor(
-    firstName: "Harry",
-    lastName: "Potter!") {
-        authorId
-        firstName
-        lastName
-    }
-}
-mutation CreateNewPublisher {
-addPublisher(name: "Harry pups") {
-        publishingCompanyId
-        name
-    }
-}
-mutation DeleteAuthor{
-    deleteAuthor(authorId: 1) {
-        firstName
-    }
-}
-mutation DeleteBook{
-    deleteBook(bookId: 1007) {
-        title
-    }
-}
-mutation DeletePublisher{
-    deletePublisher(publishingCompanyId: 2) {
-        name
-    }
-}
-mutation UpdateBook {
-    updateBook(bookId: 1000, authorId: 1, title: "updated", publishingCompanyId: 1, publishingYear: 2026) {
-        title
-        bookId
-        authorId
-        publishingYear
-        publishingCompanyId
-    }
-}
-mutation UpdateAuthor {
-    updateAuthor(authorId: 1, firstName: "bob", lastName: "marley") {
-        firstName
-    }
-}
-mutation UpdatePublisher {
-    updatePublisher(publishingCompanyId: 2, name: "djhkjdnskldn"){
-        name
-    }
-}
+Mutation responses include `success: Boolean!`, `message: String!`, and `data` (the affected entity).
+
+## Scripts
+
+| Script             | Description                                               |
+| ------------------ | --------------------------------------------------------- |
+| `npm run prepare`  | Run migrations, generate Prisma client, seed the database |
+| `npm run generate` | Run GraphQL Codegen                                       |
+| `npm run compile`  | Generate types and compile TypeScript                     |
+| `npm run start`    | Compile and start the server                              |
+| `npm run watch`    | Watch mode with live reload                               |
+
+## Project Structure
+
+```
+src/
+├── schema.graphql        # GraphQL schema definition
+├── server.ts             # Apollo Server entrypoint
+├── generated/            # Auto-generated TypeScript types
+├── resolvers/            # Query and mutation resolvers
+└── services/             # Business logic (booksService, tasksService)
+prisma/
+├── schema.prisma         # Database schema
+├── seed.ts               # Seed script
+├── data.ts               # Seed data
+└── migrations/           # Prisma migrations
+```

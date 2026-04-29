@@ -1,0 +1,1175 @@
+{
+  "info": {
+    "_postman_id": "f20af0d8-b72d-4929-a1ad-bc6edc226ef5",
+    "name": "HABO - GraphQL API Tests",
+    "description": "API tests for the Books & Tasks GraphQL API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48703513",
+    "_collection_link": "https://go.postman.co/collection/48703513-f20af0d8-b72d-4929-a1ad-bc6edc226ef5?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "Positive",
+          "item": [
+            {
+              "name": "Get all books",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has books array', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.have.property('books');",
+                      "    pm.expect(json.data.books).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('No GraphQL errors', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.not.have.property('errors');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query {\n  books {\n    id\n    title\n    author\n  }\n}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add a book",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Book added successfully', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.addBook;",
+                      "    pm.expect(res.success).to.eql(true);",
+                      "    pm.expect(res.data).to.not.be.null;",
+                      "    pm.expect(res.data).to.have.property('id');",
+                      "    pm.expect(res.data.title).to.be.a('string');",
+                      "    pm.expect(res.data.author).to.be.a('string');",
+                      "});",
+                      "",
+                      "pm.test('bookId saved as collection variable', function () {",
+                      "    const json = pm.response.json();",
+                      "    const bookId = json.data.addBook.data.id;",
+                      "    pm.expect(bookId).to.be.a('number');",
+                      "    pm.collectionVariables.set('bookId', bookId);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation AddBook($title: String!, $author: String!) {\n  addBook(title: $title, author: $author) {\n    success\n    message\n    data {\n      id\n      title\n      author\n    }\n  }\n}",
+                    "variables": "{\n  \"title\": \"Book {{$randomWords}} - {{$timestamp}}\",\n  \"author\": \"Test Author\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get book by ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns the correct book', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.book).to.not.be.null;",
+                      "    pm.expect(json.data.book).to.have.property('id');",
+                      "    pm.expect(json.data.book).to.have.property('title');",
+                      "    pm.expect(json.data.book).to.have.property('author');",
+                      "});",
+                      "",
+                      "pm.test('No GraphQL errors', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.not.have.property('errors');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query GetBook($id: Int!) {\n  book(id: $id) {\n    id\n    title\n    author\n  }\n}",
+                    "variables": "{\n  \"id\": {{bookId}}\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Negative",
+          "item": [
+            {
+              "name": "Get book by non-existent ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns null for non-existent book', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.book).to.be.null;",
+                      "});",
+                      "",
+                      "pm.test('No GraphQL errors', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.not.have.property('errors');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query GetBook($id: Int!) {\n  book(id: $id) {\n    id\n    title\n    author\n  }\n}",
+                    "variables": "{\n  \"id\": 999999\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get book with invalid ID type (string)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns GraphQL validation error', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query GetBook($id: Int!) {\n  book(id: $id) {\n    id\n    title\n    author\n  }\n}",
+                    "variables": "{\n  \"id\": \"not-a-number\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add duplicate book",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns failure for duplicate book', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.addBook;",
+                      "    pm.expect(res.success).to.eql(false);",
+                      "    pm.expect(res.message).to.eql('A book with this title and author already exists.');",
+                      "    pm.expect(res.data).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation AddBook($title: String!, $author: String!) {\n  addBook(title: $title, author: $author) {\n    success\n    message\n    data {\n      id\n      title\n      author\n    }\n  }\n}",
+                    "variables": "{\n  \"title\": \"1984\",\n  \"author\": \"George Orwell\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Query non-existent field on book",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns GraphQL error for unknown field', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query {\n  books {\n    id\n    title\n    author\n    nonExistentField\n  }\n}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Positive",
+          "item": [
+            {
+              "name": "Get all tasks",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has tasks array', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data).to.have.property('tasks');",
+                      "    pm.expect(json.data.tasks).to.be.an('array');",
+                      "});",
+                      "",
+                      "pm.test('No GraphQL errors', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.not.have.property('errors');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query {\n  tasks {\n    id\n    title\n    completed\n  }\n}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add a task",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Task added successfully', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.addTask;",
+                      "    pm.expect(res.success).to.eql(true);",
+                      "    pm.expect(res.data).to.have.property('id');",
+                      "    pm.expect(res.data.title).to.include('Task');",
+                      "    pm.expect(res.data.completed).to.eql(false);",
+                      "});",
+                      "",
+                      "pm.test('taskId saved as collection variable', function () {",
+                      "    const json = pm.response.json();",
+                      "    const taskId = json.data.addTask.data.id;",
+                      "    pm.expect(taskId).to.be.a('number');",
+                      "    pm.collectionVariables.set('taskId', taskId);",
+                      "});"
+                    ]
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation AddTask($title: String!) {\n  addTask(title: $title) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"title\": \"Task {{$randomWord}} - {{$timestamp}}\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get task by ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns the correct task', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.task).to.not.be.null;",
+                      "    pm.expect(json.data.task).to.have.property('id');",
+                      "    pm.expect(json.data.task).to.have.property('title');",
+                      "    pm.expect(json.data.task).to.have.property('completed');",
+                      "});",
+                      "",
+                      "pm.test('No GraphQL errors', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.not.have.property('errors');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query GetTask($id: Int!) {\n  task(id: $id) {\n    id\n    title\n    completed\n  }\n}",
+                    "variables": "{\n  \"id\": {{taskId}}\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update a task",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Task updated successfully', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.updateTask;",
+                      "    pm.expect(res.success).to.eql(true);",
+                      "    pm.expect(res.message).to.eql('Task updated successfully.');",
+                      "    pm.expect(res.data.title).to.eql('Updated Task');",
+                      "    pm.expect(res.data.completed).to.eql(true);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation UpdateTask($id: Int!, $title: String!, $completed: Boolean!) {\n  updateTask(id: $id, title: $title, completed: $completed) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"id\": {{taskId}},\n  \"title\": \"Updated Task\",\n  \"completed\": true\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete a task",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Task deleted successfully', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.deleteTask;",
+                      "    pm.expect(res.success).to.eql(true);",
+                      "    pm.expect(res.message).to.eql('Task removed successfully.');",
+                      "    pm.expect(res.data).to.not.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation DeleteTask($id: Int!) {\n  deleteTask(id: $id) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"id\": {{taskId}}\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Negative",
+          "item": [
+            {
+              "name": "Get task by non-existent ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns null for non-existent task', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.data.task).to.be.null;",
+                      "});",
+                      "",
+                      "pm.test('No GraphQL errors', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.not.have.property('errors');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query GetTask($id: Int!) {\n  task(id: $id) {\n    id\n    title\n    completed\n  }\n}",
+                    "variables": "{\n  \"id\": 999999\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get task with invalid ID type (string)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns GraphQL validation error', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query GetTask($id: Int!) {\n  task(id: $id) {\n    id\n    title\n    completed\n  }\n}",
+                    "variables": "{\n  \"id\": \"not-a-number\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add duplicate task",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "// First create a task so we can test duplicate",
+                      "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                      "pm.sendRequest({",
+                      "    url: baseUrl,",
+                      "    method: 'POST',",
+                      "    header: { 'Content-Type': 'application/json' },",
+                      "    body: {",
+                      "        mode: 'raw',",
+                      "        raw: JSON.stringify({",
+                      "            query: 'mutation { addTask(title: \"Duplicate Task\") { success message data { id title completed } } }'",
+                      "        })",
+                      "    }",
+                      "}, function (err, res) {",
+                      "    // Task created (or already exists), now the test will try to add the same one",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns failure for duplicate task', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.addTask;",
+                      "    pm.expect(res.success).to.eql(false);",
+                      "    pm.expect(res.message).to.eql('A task with this title already exists.');",
+                      "    pm.expect(res.data).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation AddTask($title: String!) {\n  addTask(title: $title) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"title\": \"Duplicate Task\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add task with missing title",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns GraphQL validation error for missing title', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation {\n  addTask {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update non-existent task",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns failure for non-existent task', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.updateTask;",
+                      "    pm.expect(res.success).to.eql(false);",
+                      "    pm.expect(res.message).to.eql('A task with this id does not exist.');",
+                      "    pm.expect(res.data).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation UpdateTask($id: Int!, $title: String!, $completed: Boolean!) {\n  updateTask(id: $id, title: $title, completed: $completed) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"id\": 999999,\n  \"title\": \"Ghost Task\",\n  \"completed\": false\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update task with missing required fields",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns GraphQL validation error', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation UpdateTask($id: Int!) {\n  updateTask(id: $id) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"id\": 1\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete non-existent task",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Returns failure for non-existent task', function () {",
+                      "    const json = pm.response.json();",
+                      "    const res = json.data.deleteTask;",
+                      "    pm.expect(res.success).to.eql(false);",
+                      "    pm.expect(res.message).to.eql('A task with this id does not exist.');",
+                      "    pm.expect(res.data).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation DeleteTask($id: Int!) {\n  deleteTask(id: $id) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"id\": 999999\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete task with invalid ID type",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns GraphQL validation error', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation DeleteTask($id: Int!) {\n  deleteTask(id: $id) {\n    success\n    message\n    data {\n      id\n      title\n      completed\n    }\n  }\n}",
+                    "variables": "{\n  \"id\": \"abc\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Invalid GraphQL query syntax",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns GraphQL parse error', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query { this is not valid graphql }",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Call non-existent query",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 400', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                      "});",
+                      "",
+                      "pm.test('Returns error for unknown field', function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property('errors');",
+                      "    pm.expect(json.errors).to.be.an('array').that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query {\n  users {\n    id\n    name\n  }\n}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "bookId",
+      "value": ""
+    },
+    {
+      "key": "taskId",
+      "value": ""
+    }
+  ]
+}
