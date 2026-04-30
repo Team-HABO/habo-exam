@@ -1,4 +1,5 @@
 import { prisma } from "../../prisma/prisma.js";
+import { sanitizeInput } from "../utils/sanitize.js";
 
 export async function getTasks() {
     return prisma.task.findMany();
@@ -9,23 +10,35 @@ export async function getTaskById(id: number) {
 }
 
 export async function addTask(title: string) {
-    const existingTask = await prisma.task.findUnique({ where: { title } });
+    try {
+        // Sanitize input before storing
+        const sanitizedTitle = sanitizeInput(title);
 
-    if (existingTask) {
+        const existingTask = await prisma.task.findUnique({ where: { title: sanitizedTitle } });
+
+        if (existingTask) {
+            return {
+                success: false,
+                message: "A task with this title already exists.",
+                data: null,
+            };
+        }
+
+        const newTask = await prisma.task.create({ data: { title: sanitizedTitle, completed: false } });
+
+        return {
+            success: true,
+            message: "Task added successfully.",
+            data: newTask,
+        };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to add task";
         return {
             success: false,
-            message: "A task with this title already exists.",
+            message,
             data: null,
         };
     }
-
-    const newTask = await prisma.task.create({ data: { title, completed: false } });
-
-    return {
-        success: true,
-        message: "Task added successfully.",
-        data: newTask,
-    };
 }
 
 export async function deleteTask(id: number) {
@@ -48,23 +61,35 @@ export async function deleteTask(id: number) {
 }
 
 export async function updateTask(id: number, title: string, completed: boolean) {
-    const existingTask = await prisma.task.findUnique({ where: { id } });
-    if (!existingTask) {
+    try {
+        const existingTask = await prisma.task.findUnique({ where: { id } });
+        if (!existingTask) {
+            return {
+                success: false,
+                message: "A task with this id does not exist.",
+                data: null,
+            };
+        }
+
+        // Sanitize input before updating
+        const sanitizedTitle = sanitizeInput(title);
+
+        const updatedTask = await prisma.task.update({
+            where: { id },
+            data: { title: sanitizedTitle, completed },
+        });
+
+        return {
+            success: true,
+            message: "Task updated successfully.",
+            data: updatedTask,
+        };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to update task";
         return {
             success: false,
-            message: "A task with this id does not exist.",
+            message,
             data: null,
         };
     }
-
-    const updatedTask = await prisma.task.update({
-        where: { id },
-        data: { title, completed },
-    });
-
-    return {
-        success: true,
-        message: "Task updated successfully.",
-        data: updatedTask,
-    };
 }

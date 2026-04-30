@@ -1,12 +1,14 @@
 using System.ServiceModel;
 using soap.Data;
 using soap.Models;
+using Ganss.Xss;
 
 namespace soap.Services;
 
 public class ArtistService(AppDbContext db) : IArtistService
 {
     private readonly AppDbContext _db = db;
+    private static readonly HtmlSanitizer Sanitizer = new();
 
     public int CreateArtist(CreateArtist request)
     {
@@ -41,9 +43,9 @@ public class ArtistService(AppDbContext db) : IArtistService
         // Create
         var artist = new Artist
         {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Gender = request.Gender,
+            FirstName = Sanitizer.Sanitize(request.FirstName),
+            LastName = Sanitizer.Sanitize(request.LastName),
+            Gender = Sanitizer.Sanitize(request.Gender),
             DateOfBirth = request.DateOfBirth
         };
 
@@ -114,9 +116,9 @@ public class ArtistService(AppDbContext db) : IArtistService
                 new ValidationFault { ErrorCode = "VALIDATION_ERROR", ErrorMessage = "DateOfBirth is required." },
                 "DateOfBirth is required.");
 
-        artist.FirstName = request.FirstName;
-        artist.LastName = request.LastName;
-        artist.Gender = request.Gender;
+        artist.FirstName = Sanitizer.Sanitize(request.FirstName);
+        artist.LastName = Sanitizer.Sanitize(request.LastName);
+        artist.Gender = Sanitizer.Sanitize(request.Gender);
         artist.DateOfBirth = request.DateOfBirth;
 
         _db.SaveChanges();
