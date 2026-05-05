@@ -1,33 +1,41 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Ganss.Xss;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using rest.DTOs;
 using rest.Helpers;
 using rest.Models;
 using rest.Repositories;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace rest.Controllers.v1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class MoviesController : ControllerBase
     {
         private readonly IMoviesRepository _repository;
-        public MoviesController(IMoviesRepository repository)
+        private readonly IHtmlSanitizer _sanitizer;
+        public MoviesController(IMoviesRepository repository, IHtmlSanitizer sanitizer)
         {
             _repository = repository;
+            _sanitizer = sanitizer;
         }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Movie>>> GetAll(
+        public async Task<ActionResult<PaginatedResult<Movie>>> GetAll(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
-            [FromQuery] string? search = null)
+            [FromQuery]
+            [StringLength(100)]
+            [RegularExpression(@"^[^<>]*$", ErrorMessage = "Search contains invalid characters.")]
+            string? search = null)
         {
+            if (page <= 0 || pageSize <= 0)
+                return BadRequest("Query parameters 'page' and 'pageSize' must be greater than 0.");
             PaginatedResult<Movie> result = await _repository.GetAllAsync(page, pageSize, search);
             if (result.TotalCount == 0)
                 return NoContent();
@@ -39,29 +47,34 @@ namespace rest.Controllers.v1
             ));
 
             result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page = 1, pageSize }) ?? string.Empty,
-                rel: "first",
+                href: Url.Action(nameof(GetAll), new { page = result.TotalPages, pageSize, search }) ?? string.Empty,
+                rel: "last",
                 method: "GET"
             ));
 
             result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page = result.TotalPages, pageSize }) ?? string.Empty,
-                rel: "last",
+                href: Url.Action(nameof(GetAll), new { page = 1, pageSize, search }) ?? string.Empty,
+                rel: "first",
                 method: "GET"
             ));
+
             if (page > 1)
+            {
                 result._links.Add(new Link(
-                    href: Url.Action(nameof(GetAll), new { page = page - 1, pageSize }) ?? string.Empty,
+                    href: Url.Action(nameof(GetAll), new { page = page - 1, pageSize, search }) ?? string.Empty,
                     rel: "prev",
                     method: "GET"
                 ));
-
+            }
             if (page < result.TotalPages)
+            {
                 result._links.Add(new Link(
-                    href: Url.Action(nameof(GetAll), new { page = page + 1, pageSize }) ?? string.Empty,
+                    href: Url.Action(nameof(GetAll), new { page = page + 1, pageSize, search }) ?? string.Empty,
                     rel: "next",
                     method: "GET"
                 ));
+            }
+
             return Ok(result);
         }
 
@@ -71,6 +84,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetById(int id)
         {
+            if (id <= 0) return BadRequest("ID must be a positive number.");
             var movie = await _repository.GetByIdAsync(id);
             if (movie == null)
                 return NotFound();
@@ -84,7 +98,7 @@ namespace rest.Controllers.v1
             ));
 
             result._links.Add(new Link(
-                href: Url.Action(nameof(Update), new { id }) ?? string.Empty,
+                href: Url.Action(nameof(Put), new { id }) ?? string.Empty,
                 rel: "update",
                 method: "PUT"
             ));
@@ -112,9 +126,9 @@ namespace rest.Controllers.v1
         {
             var movie = new Movie
             {
-                Title = dto.Title,
+                Title = _sanitizer.Sanitize(dto.Title),
+                Genre = _sanitizer.Sanitize(dto.Genre),
                 ReleaseYear = dto.ReleaseYear,
-                Genre = dto.Genre,
                 DirectorID = dto.DirectorID,
                 ProductionCompanyID = dto.ProductionCompanyID
             };
@@ -129,7 +143,7 @@ namespace rest.Controllers.v1
                 method: "GET"
             ));
             result._links.Add(new Link(
-                href: Url.Action(nameof(Update), new { id = created.Id }) ?? string.Empty,
+                href: Url.Action(nameof(Put), new { id = created.Id }) ?? string.Empty,
                 rel: "update",
                 method: "PUT"
             ));
@@ -145,7 +159,6 @@ namespace rest.Controllers.v1
                 method: "GET"
             ));
 
-
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, result);
         }
 
@@ -154,8 +167,11 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Movie>> Put(int id, [FromBody] MovieDto movie)
+        public async Task<ActionResult<SingleResult<Movie>>> Put(int id, [FromBody] MovieDto movie)
         {
+            if (id <= 0) return BadRequest("ID must be a positive number.");
+            movie.Title = _sanitizer.Sanitize(movie.Title);
+            movie.Genre = _sanitizer.Sanitize(movie.Genre);
 
             Movie? updatedMovie = await _repository.UpdateAsync(id, movie);
             if (updatedMovie == null) return NotFound();
@@ -180,7 +196,7 @@ namespace rest.Controllers.v1
                 method: "GET"
             ));
 
-            return Ok(updatedMovie);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
@@ -189,6 +205,8 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Delete(int id)
         {
+            if (id <= 0) return BadRequest("ID must be a positive number.");
+
             var deleted = await _repository.DeleteAsync(id);
 
             if (!deleted)

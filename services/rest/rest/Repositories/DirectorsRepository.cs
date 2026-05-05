@@ -20,6 +20,7 @@ namespace rest.Repositories
         public async Task<PaginatedResult<Director>> GetAllAsync(int page, int pageSize, string? search = null)
         {
             var query = _context.Directors.AsQueryable();
+            if (pageSize > 50) pageSize = 50;
 
             if (!string.IsNullOrWhiteSpace(search))
             {
