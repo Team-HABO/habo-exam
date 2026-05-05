@@ -21,6 +21,7 @@ namespace rest.Repositories
         public async Task<PaginatedResult<Movie>> GetAllAsync(int page, int pageSize, string? search = null)
         {
             var query = _context.Movies.AsQueryable();
+            if (pageSize > 50) pageSize = 50;
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -34,8 +35,6 @@ namespace rest.Repositories
             var totalCount = await query.CountAsync();
 
             var movies = await query
-                .Include(m => m.Director)            
-                .Include(m => m.ProductionCompany)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

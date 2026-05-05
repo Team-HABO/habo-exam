@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using rest.Helpers;
 using rest.Models;
+using System.ComponentModel.DataAnnotations;
 using rest.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace rest.Controllers.v1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductionCompaniesController : ControllerBase
     {
         private readonly IProductionCompaniesRepository _repository;
@@ -19,11 +21,16 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<ProductionCompany>>> GetAll(
+        public async Task<ActionResult<PaginatedResult<ProductionCompany>>> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
-            [FromQuery] string? search = null)
+            [FromQuery]
+            [StringLength(100)]
+            [RegularExpression(@"^[^<>]*$", ErrorMessage = "Search contains invalid characters.")]
+            string? search = null)
         {
+            if (page <= 0 || pageSize <= 0)
+                return BadRequest("Query parameters 'page' and 'pageSize' must be greater than 0.");
             PaginatedResult<ProductionCompany> result = await _repository.GetAllAsync(page, pageSize, search);
             if (result.TotalCount == 0)
                 return NoContent();
@@ -67,6 +74,8 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetById(int id)
         {
+            if (id <= 0) return BadRequest("ID must be a positive number.");
+
             var productionCompany = await _repository.GetByIdAsync(id);
             if (productionCompany == null)
                 return NotFound();
