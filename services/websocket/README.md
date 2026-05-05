@@ -7,7 +7,7 @@ Clients can fetch stored messages (unary) and post new ones that are broadcast t
 
 ## Requirements
 
-- Node.js ≥ 18
+- Node.js ≥ 20
 - npm
 
 ---

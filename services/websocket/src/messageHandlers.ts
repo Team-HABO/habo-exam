@@ -8,7 +8,11 @@ type SendMessagePayload = {
 };
 
 function isValidPayload(value: unknown): value is SendMessagePayload {
-	return typeof value === 'object' && value !== null && 'username' in value && 'content' in value;
+	if (typeof value !== 'object' || value === null) {
+		return false;
+	}
+
+	return typeof value.username === 'string' && typeof value.content === 'string';
 }
 
 export async function handleGetMessages(ws: WebSocket): Promise<void> {
