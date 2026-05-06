@@ -32,15 +32,15 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore NuGet packages
-        run: dotnet restore rest.csproj
+        run: dotnet restore rest/rest.csproj # Points to services/rest/rest/rest.csproj
 
       - name: Build REST API
-        run: dotnet build rest.csproj -c Release --no-restore
+        run: dotnet build rest/rest.csproj -c Release --no-restore
 
       - name: Start REST API Server in background
         run: |
           export ConnectionStrings__DefaultConnection="Data Source=rest/movies.db"
-          dotnet run --project rest.csproj --urls http://localhost:8080 &
+          dotnet run --project rest/rest.csproj --urls http://localhost:8080 &
 
       - name: Wait for Server to be Ready
         run: |
