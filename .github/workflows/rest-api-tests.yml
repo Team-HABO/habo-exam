@@ -22,6 +22,17 @@ jobs:
   automated-api-tests:
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -40,6 +51,7 @@ jobs:
       - name: Start REST API Server in background
         run: |
           export ConnectionStrings__DefaultConnection="Data Source=rest/movies.db"
+          export REDIS_CONNECTION_STRING="127.0.0.1:6379"
           nohup dotnet run --project rest/rest.csproj --urls http://localhost:8080 > server.log 2>&1 &
           echo $! > server.pid
           # give the process a moment to start and write logs
@@ -67,10 +79,14 @@ jobs:
           fi
 
       - name: Smoke test API
-        run: curl -v http://localhost:8080/api/v1/movies || (echo "Smoke test failed" && exit 1)
-
-      - name: Smoke test API (with logs on failure)
-        if: always()
         run: |
-          curl -v http://localhost:8080/api/v1/movies || (echo "Smoke test failed"; echo "--- server.log ---"; cat server.log || true; exit 1)
+          curl -v http://localhost:8080/api/v1/movies || {
+            echo "--- server.log ---"
+            cat server.log || true
+            exit 1
+          }
+
+      - name: Print server logs
+        if: always()
+        run: cat server.log || true
         
