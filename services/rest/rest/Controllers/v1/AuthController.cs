@@ -37,10 +37,7 @@ namespace rest.Controllers.v1
                 scope = "openid profile email"
             };
             var response = await client.PostAsJsonAsync($"https://{_config["Auth0_Domain"]}/oauth/token", auth0Request);
-            Console.WriteLine("!!!!!!!" +_config["Auth0_Domain"]);
-            Console.WriteLine(_config["Auth0_Audience"]);
-            Console.WriteLine(_config["Auth0_ClientId"]);
-            Console.WriteLine(_config["Auth0_ClientSecret"]);
+
             if (!response.IsSuccessStatusCode)
             {
                 return Unauthorized("Invalid credentials or Auth0 configuration error.");
@@ -61,13 +58,20 @@ namespace rest.Controllers.v1
                 return Forbid();
 
             // Get the token expiry to set Redis TTL (no point storing it longer than needed)
+            var expiry = TimeSpan.FromHours(1); // Default if no expClaim
             var expClaim = User.FindFirst("exp")?.Value;
-            var expiry = expClaim != null
-                ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(expClaim)) - DateTimeOffset.UtcNow
-                : TimeSpan.FromHours(1); // fallback
+            if (long.TryParse(expClaim, out var expUnix))
+            {
+                var remaining = DateTimeOffset.FromUnixTimeSeconds(expUnix) - DateTimeOffset.UtcNow;
+                if (remaining <= TimeSpan.Zero)
+                    return BadRequest(new { message = "Token is already expired." });
 
-            if (expiry <= TimeSpan.Zero)
-                return BadRequest("Token is already expired.");
+                expiry = remaining;
+            }
+            else
+            {
+                return Unauthorized(new { error = "Malformed token: missing expiration." });
+            }
 
             await _tokenService.BlacklistTokenAsync(jwtId, expiry);
             return Ok(new { message = "Logged out successfully." });

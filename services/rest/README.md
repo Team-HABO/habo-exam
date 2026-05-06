@@ -1,6 +1,6 @@
 # REST Movie Service
 
-REST API for managing movies, direcotrs and production companies
+REST API for managing movies, directors and production companies
 
 ## Endpoints
  - Movies: GetAll, GetByID, Create, Update and Delete
@@ -38,7 +38,7 @@ The XSS process:
  - Execution: A victim's browser requests data from the API. The frontend JavaScript receives the JSON and injects the malicious string directly into the DOM (e.g., using .innerHTML). The browser then executes the script.
 
 #### XSS prevention
-string input Genre and title in Create and Update movie endpoints get sanitized using HtmlSanitizer installed with nuget pakage.
+string input Genre and title in Create and Update movie endpoints get sanitized using HtmlSanitizer installed with NuGet package.
 Content-Security-Policy (CSP) header is added to every response, it tells the browser which resources (scripts, styles, images) are allowed to be loaded and executed on a specific page
 How CSP header protects against XSS
 
@@ -78,7 +78,7 @@ CORS is configured in program.cs where it allows any method from client "http://
 CORS is applied in program.cs with app.UseCors("AllowFrontend");
 
 ### jwt revocation strategy
-The API is using blacklisting because it is the most statefull strategy. When a user logs out the token gets stored in a redis database.
+The API is using blacklisting because it is the most stateful strategy. When a user logs out the token gets stored in a redis database.
 To check if the token is stored in redis, use this command
 ```bash
 docker exec -it <container-name> redis-cli

@@ -1724,11 +1724,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/auth/logout/{{current_jti}}",
+              "raw": "{{baseUrl}}/api/v1/auth/logout/{{current_jti}}",
               "host": [
-                "{{BASE_URL}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "api",
+                "v1",
                 "auth",
                 "logout",
                 "{{current_jti}}"
