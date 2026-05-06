@@ -40,7 +40,7 @@ jobs:
       - name: Start REST API Server in background
         run: |
           export ConnectionStrings__DefaultConnection="Data Source=rest/movies.db"
-          dotnet run --project rest/rest.csproj --urls http://localhost:8080 &
+          dotnet run --project rest.csproj --urls http://localhost:8080 &
 
       - name: Wait for Server to be Ready
         run: |
