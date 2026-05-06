@@ -19,11 +19,11 @@
     <PackageReference Include="StackExchange.Redis" Version="2.12.14" />
   </ItemGroup>
 
-<ItemGroup>
-	<Content Update="movies.db">
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-	</Content>
-</ItemGroup>
+    <ItemGroup>
+	    <Content Include="movies.db">
+		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	    </Content>
+    </ItemGroup>
 
 </Project>

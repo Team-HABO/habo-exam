@@ -1,4 +1,4 @@
-name: Service RESY CI
+name: Service REST CI
 
 on:
   workflow_call:
@@ -45,11 +45,13 @@ jobs:
       - name: Wait for Server to be Ready
         run: |
           for i in {1..30}; do
-            if curl -sSf http://localhost:8080/api/v1/movies >/dev/null; then
-              echo "API is ready"; break
+             status=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:8080/api/v1/movies || true)
+             if [ "$status" = "200" ] || [ "$status" = "401" ]; then
+               echo "API is ready (HTTP $status)"; break
             fi
             sleep 1
           done
 
       - name: Smoke test API
         run: curl -v http://localhost:8080/api/v1/movies || (echo "Smoke test failed" && exit 1)
+        

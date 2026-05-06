@@ -46,9 +46,7 @@ builder.Services.AddScoped<IProductionCompaniesRepository, ProductionCompaniesRe
 builder.Services.AddControllers();
 // XSS sanitation
 builder.Services.AddScoped<IHtmlSanitizer, HtmlSanitizer>();
-//builder.Services.AddSingleton<IConnectionMultiplexer>(
-//    ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]!));
-//var redisConn = builder.Configuration["Redis:ConnectionString"]!;
+
 var redisConn = builder.Configuration["REDIS_CONNECTION_STRING"]! ?? throw new InvalidOperationException("Redis connection string is null"); 
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(redisConn));
