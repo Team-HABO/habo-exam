@@ -32,7 +32,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore NuGet packages
-        run: dotnet restore rest/rest.csproj # Points to services/rest/rest/rest.csproj
+        run: dotnet restore rest/rest.csproj 
 
       - name: Build REST API
         run: dotnet build rest/rest.csproj -c Release --no-restore
@@ -40,18 +40,37 @@ jobs:
       - name: Start REST API Server in background
         run: |
           export ConnectionStrings__DefaultConnection="Data Source=rest/movies.db"
-          dotnet run --project rest/rest.csproj --urls http://localhost:8080 &
+          nohup dotnet run --project rest/rest.csproj --urls http://localhost:8080 > server.log 2>&1 &
+          echo $! > server.pid
+          # give the process a moment to start and write logs
+          sleep 1
 
       - name: Wait for Server to be Ready
         run: |
-          for i in {1..30}; do
-             status=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:8080/api/v1/movies || true)
-             if [ "$status" = "200" ] || [ "$status" = "401" ]; then
-               echo "API is ready (HTTP $status)"; break
+          status=""
+          for i in {1..60}; do
+            status=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:8080/api/v1/movies || true)
+            if [ "$status" = "200" ] || [ "$status" = "401" ]; then
+              echo "API is ready (HTTP $status)"; break
+            fi
+            # if server process exited, show logs and fail early
+            if [ -f server.pid ]; then
+              pid=$(cat server.pid)
+              if ! kill -0 "$pid" 2>/dev/null; then
+                echo "Server process $pid exited unexpectedly"; cat server.log || true; exit 1
+              fi
             fi
             sleep 1
           done
+          if [ "$status" != "200" ] && [ "$status" != "401" ]; then
+            echo "Server did not become ready in time"; cat server.log || true; exit 1
+          fi
 
       - name: Smoke test API
         run: curl -v http://localhost:8080/api/v1/movies || (echo "Smoke test failed" && exit 1)
+
+      - name: Smoke test API (with logs on failure)
+        if: always()
+        run: |
+          curl -v http://localhost:8080/api/v1/movies || (echo "Smoke test failed"; echo "--- server.log ---"; cat server.log || true; exit 1)
         
