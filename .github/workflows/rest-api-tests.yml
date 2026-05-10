@@ -69,8 +69,8 @@ jobs:
 
       - name: Run API Tests
         run: |
-          newman run tests/postman/your_collection.json \
-          -e tests/postman/REST-API-v1.postman_environment.json \
+          newman run tests/REST-API-v1.postman_collection.json \
+          -e tests/REST-API-v1.postman_environment.json \
           --env-var "baseUrl=http://localhost:5286" \
           --env-var "auth0_username=${{ secrets.AUTH0_USERNAME }}" \
           --env-var "auth0_password=${{ secrets.AUTH0_PASSWORD }}"
