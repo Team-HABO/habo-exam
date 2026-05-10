@@ -85,11 +85,13 @@ docker exec -it <container-name> redis-cli
 127.0.0.1:6379> keys *
 ```
 
+### Hypermedia as the engine of application state (HATEOAS)
+All endpoint implement HATEOAS with contextual links. It is using the convention HAL – Hypertext Application Language
 
+### Postman tests
+To run the tests you need two environment variables as seen in REST-API-V1-EXAMPEL-ENV.postman_environment
 
 
 ### to do
 
-HATEOAS and filters on getall
 OpenAPI documentation 
-Finnish readme

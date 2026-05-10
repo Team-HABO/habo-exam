@@ -1,6 +1,7 @@
-﻿using rest.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using rest.Data;
+using rest.DTOs;
 using rest.Helpers;
-using Microsoft.EntityFrameworkCore;
 using rest.Models;
 
 namespace rest.Repositories
@@ -17,7 +18,7 @@ namespace rest.Repositories
             var director = await _context.Directors.FindAsync(id);
             return director;
         }
-        public async Task<PaginatedResult<Director>> GetAllAsync(int page, int pageSize, string? search = null)
+        public async Task<PaginatedResult<DirectorHateoasDto>> GetAllAsync(int page, int pageSize, string? search = null)
         {
             var query = _context.Directors.AsQueryable();
             if (pageSize > 50) pageSize = 50;
@@ -35,15 +36,17 @@ namespace rest.Repositories
             var directors = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .Select(d => new DirectorHateoasDto(d))
                 .ToListAsync();
 
-            return new PaginatedResult<Director>
-            {
-                Data = directors,
+            var result = new PaginatedResult<DirectorHateoasDto>
+            {   
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = totalCount
             };
+            result.Embedded["directors"] = directors;
+            return result;
         }
     }
 }

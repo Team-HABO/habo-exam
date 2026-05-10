@@ -1,9 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using rest.Models;
-using StackExchange.Redis;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿using StackExchange.Redis;
 
 namespace rest.Services
 {

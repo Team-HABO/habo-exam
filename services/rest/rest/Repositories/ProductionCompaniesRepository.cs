@@ -1,7 +1,8 @@
-﻿using rest.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using rest.Data;
+using rest.DTOs;
 using rest.Helpers;
 using rest.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace rest.Repositories
 {
@@ -17,7 +18,7 @@ namespace rest.Repositories
             var productionCompany = await _context.ProductionCompanies.FindAsync(id);
             return productionCompany;
         }
-        public async Task<PaginatedResult<ProductionCompany>> GetAllAsync(int page, int pageSize, string? search = null)
+        public async Task<PaginatedResult<ProductionCompanyHateoasDto>> GetAllAsync(int page, int pageSize, string? search = null)
         {
             var query = _context.ProductionCompanies.AsQueryable();
             if (pageSize > 50) pageSize = 50;
@@ -34,15 +35,17 @@ namespace rest.Repositories
             var productionCompanies = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .Select(pc => new ProductionCompanyHateoasDto(pc))
                 .ToListAsync();
 
-            return new PaginatedResult<ProductionCompany>
+            var result = new PaginatedResult<ProductionCompanyHateoasDto>
             {
-                Data = productionCompanies,
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = totalCount
             };
+            result.Embedded["productionCompanies"] = productionCompanies;
+            return result;
         }
     }
 }

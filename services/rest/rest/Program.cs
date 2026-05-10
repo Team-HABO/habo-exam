@@ -61,9 +61,9 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.Authority = "https://habo-integration-exam.us.auth0.com/";
-
-    options.Audience = "https://habo-fake-frontend.sk";
+    options.Authority = builder.Configuration["Auth0_Authority"];
+    
+    options.Audience = builder.Configuration["Auth0_Audience"];
 
     options.TokenValidationParameters = new TokenValidationParameters
     {

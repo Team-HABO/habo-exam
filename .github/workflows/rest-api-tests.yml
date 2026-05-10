@@ -21,7 +21,11 @@ defaults:
 jobs:
   automated-api-tests:
     runs-on: ubuntu-latest
-
+    
+    env:
+      Auth0_Domain: ${{ secrets.AUTH0_DOMAIN }}
+      Auth0_ClientId: ${{ secrets.AUTH0_CLIENT_ID }}
+      Auth0_ClientSecret: ${{ secrets.AUTH0_CLIENT_SECRET }}
     services:
       redis:
         image: redis:alpine
@@ -38,7 +42,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -48,45 +52,27 @@ jobs:
       - name: Build REST API
         run: dotnet build rest/rest.csproj -c Release --no-restore
 
-      - name: Start REST API Server in background
+      - name: Start API
         run: |
           export ConnectionStrings__DefaultConnection="Data Source=rest/movies.db"
           export REDIS_CONNECTION_STRING="127.0.0.1:6379"
-          nohup dotnet run --project rest/rest.csproj --urls http://localhost:8080 > server.log 2>&1 &
-          echo $! > server.pid
-          # give the process a moment to start and write logs
-          sleep 1
+          dotnet run --project rest/rest.csproj &
+          sleep 15
 
-      - name: Wait for Server to be Ready
+      - name: Verify API is running
+        run: curl http://localhost:8080
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run API Tests
         run: |
-          status=""
-          for i in {1..60}; do
-            status=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:8080/api/v1/movies || true)
-            if [ "$status" = "200" ] || [ "$status" = "401" ]; then
-              echo "API is ready (HTTP $status)"; break
-            fi
-            # if server process exited, show logs and fail early
-            if [ -f server.pid ]; then
-              pid=$(cat server.pid)
-              if ! kill -0 "$pid" 2>/dev/null; then
-                echo "Server process $pid exited unexpectedly"; cat server.log || true; exit 1
-              fi
-            fi
-            sleep 1
-          done
-          if [ "$status" != "200" ] && [ "$status" != "401" ]; then
-            echo "Server did not become ready in time"; cat server.log || true; exit 1
-          fi
+          newman run tests/postman/your_collection.json \
+          -e tests/postman/REST-API-v1.postman_environment.json \
+          --env-var "baseUrl=http://localhost:8080" \
+          --env-var "auth0_username=${{ secrets.AUTH0_USERNAME }}" \
+          --env-var "auth0_password=${{ secrets.AUTH0_PASSWORD }}"
 
-      - name: Smoke test API
-        run: |
-          curl -v http://localhost:8080/api/v1/movies || {
-            echo "--- server.log ---"
-            cat server.log || true
-            exit 1
-          }
-
-      - name: Print server logs
-        if: always()
-        run: cat server.log || true
-        
+      - name: Print API logs
+        if: failure()
+        run: cat api.log

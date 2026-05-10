@@ -1,4 +1,16 @@
 services:
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   rest-api:
     build:
       context: .
@@ -21,17 +33,6 @@ services:
         - ./rest:/src
         - rest-bin:/src/bin
         - rest-obj:/src/obj
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
 volumes:
   rest-bin:

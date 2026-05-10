@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using rest.DTOs;
 using rest.Helpers;
-using rest.Models;
 using rest.Repositories;
 using System.ComponentModel.DataAnnotations;
 
@@ -21,50 +21,64 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<PaginatedResult<Director>>> GetAll(
+        public async Task<ActionResult<PaginatedResult<DirectorHateoasDto>>> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery]
             [StringLength(100)]
-            [RegularExpression(@"^[^<>]*$", ErrorMessage = "Search contains invalid characters.")]
             string? search = null)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Query parameters 'page' and 'pageSize' must be greater than 0.");
-            PaginatedResult<Director> result = await _repository.GetAllAsync(page, pageSize, search);
+            PaginatedResult<DirectorHateoasDto> result = await _repository.GetAllAsync(page, pageSize, search);
             if (result.TotalCount == 0)
                 return NoContent();
 
-            result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page, pageSize }) ?? string.Empty,
+            foreach (var director in result.Embedded["directors"])
+            {
+                director.Links.Add(new Link(
+                    href: Url.Action(nameof(GetById), new { id = director.Id }) ?? string.Empty,
+                    rel: "self",
+                    method: "GET"
+                ));
+            }
+            result.Links.Add(new Link(
+                href: Url.Action(nameof(GetAll), new { page, result.PageSize, search }) ?? string.Empty,
                 rel: "self",
                 method: "GET"
             ));
 
-            result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page = 1, pageSize }) ?? string.Empty,
+            result.Links.Add(new Link(
+                href: Url.Action(nameof(GetAll), new { page = 1, result.PageSize, search }) ?? string.Empty,
                 rel: "first",
                 method: "GET"
             ));
 
-            result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page = result.TotalPages, pageSize }) ?? string.Empty,
+            result.Links.Add(new Link(
+                href: Url.Action(nameof(GetAll), new { page = result.TotalPages, result.PageSize, search }) ?? string.Empty,
                 rel: "last",
                 method: "GET"
             ));
+
             if (page > 1)
-                result._links.Add(new Link(
-                    href: Url.Action(nameof(GetAll), new { page = page - 1, pageSize }) ?? string.Empty,
+                result.Links.Add(new Link(
+                    href: Url.Action(nameof(GetAll), new { page = page - 1, result.PageSize, search }) ?? string.Empty,
                     rel: "prev",
                     method: "GET"
                 ));
 
             if (page < result.TotalPages)
-                result._links.Add(new Link(
-                    href: Url.Action(nameof(GetAll), new { page = page + 1, pageSize }) ?? string.Empty,
+                result.Links.Add(new Link(
+                    href: Url.Action(nameof(GetAll), new { page = page + 1, result.PageSize, search }) ?? string.Empty,
                     rel: "next",
                     method: "GET"
                 ));
+            //Search must be there
+            result.Links.Add(new Link(
+                href: $"/api/v1/Directors?search={{search}}",
+                rel: "search",
+                method: "GET"
+            ));
             return Ok(result);
         }
 
@@ -79,16 +93,15 @@ namespace rest.Controllers.v1
             var director = await _repository.GetByIdAsync(id);
             if (director == null)
                 return NotFound();
+            var result = new DirectorHateoasDto(director);
 
-            var result = new SingleResult<Director>(director);
-
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetById), new { id }) ?? string.Empty,
                 rel: "self",
                 method: "GET"
             ));
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetAll)) ?? string.Empty,
                 rel: "collection",
                 method: "GET"

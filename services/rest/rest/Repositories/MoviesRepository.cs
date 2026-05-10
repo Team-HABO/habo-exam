@@ -18,7 +18,7 @@ namespace rest.Repositories
             var movie = await _context.Movies.FindAsync(id);
             return movie;
         }
-        public async Task<PaginatedResult<Movie>> GetAllAsync(int page, int pageSize, string? search = null)
+        public async Task<PaginatedResult<MovieHateoasDto>> GetAllAsync(int page, int pageSize, string? search = null)
         {
             var query = _context.Movies.AsQueryable();
             if (pageSize > 50) pageSize = 50;
@@ -37,15 +37,17 @@ namespace rest.Repositories
             var movies = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .Select(m => new MovieHateoasDto(m))
                 .ToListAsync();
 
-            return new PaginatedResult<Movie>
+            var result = new PaginatedResult<MovieHateoasDto>
             {
-                Data = movies,
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = totalCount
             };
+            result.Embedded["movies"] = movies;
+            return result;
         }
         public async Task<Movie> AddAsync(Movie movie)
         {

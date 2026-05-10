@@ -26,54 +26,67 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<PaginatedResult<Movie>>> GetAll(
+        public async Task<ActionResult<PaginatedResult<MovieHateoasDto>>> GetAll(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 10,
             [FromQuery]
             [StringLength(100)]
-            [RegularExpression(@"^[^<>]*$", ErrorMessage = "Search contains invalid characters.")]
             string? search = null)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Query parameters 'page' and 'pageSize' must be greater than 0.");
-            PaginatedResult<Movie> result = await _repository.GetAllAsync(page, pageSize, search);
+            PaginatedResult<MovieHateoasDto> result = await _repository.GetAllAsync(page, pageSize, search);
             if (result.TotalCount == 0)
                 return NoContent();
 
-            result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page, pageSize }) ?? string.Empty,
+            foreach (var movie in result.Embedded["movies"])
+            {
+                movie.Links.Add(new Link(
+                    href: Url.Action(nameof(GetById), new { id = movie.Id }) ?? string.Empty,
+                    rel: "self",
+                    method: "GET"
+                ));
+            }
+
+            result.Links.Add(new Link(
+                href: Url.Action(nameof(GetAll), new { page, result.PageSize, search }) ?? string.Empty,
                 rel: "self",
                 method: "GET"
             ));
 
-            result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page = result.TotalPages, pageSize, search }) ?? string.Empty,
+            result.Links.Add(new Link(
+                href: Url.Action(nameof(GetAll), new { page = result.TotalPages, result.PageSize, search }) ?? string.Empty,
                 rel: "last",
                 method: "GET"
             ));
 
-            result._links.Add(new Link(
-                href: Url.Action(nameof(GetAll), new { page = 1, pageSize, search }) ?? string.Empty,
+            result.Links.Add(new Link(
+                href: Url.Action(nameof(GetAll), new { page = 1, result.PageSize, search }) ?? string.Empty,
                 rel: "first",
                 method: "GET"
             ));
 
             if (page > 1)
             {
-                result._links.Add(new Link(
-                    href: Url.Action(nameof(GetAll), new { page = page - 1, pageSize, search }) ?? string.Empty,
+                result.Links.Add(new Link(
+                    href: Url.Action(nameof(GetAll), new { page = page - 1, result.PageSize, search }) ?? string.Empty,
                     rel: "prev",
                     method: "GET"
                 ));
             }
             if (page < result.TotalPages)
             {
-                result._links.Add(new Link(
-                    href: Url.Action(nameof(GetAll), new { page = page + 1, pageSize, search }) ?? string.Empty,
+                result.Links.Add(new Link(
+                    href: Url.Action(nameof(GetAll), new { page = page + 1, result.PageSize, search }) ?? string.Empty,
                     rel: "next",
                     method: "GET"
                 ));
             }
+            result.Links.Add(new Link(
+                href: $"/api/v1/Movies?search={{search}}",
+                rel: "search",
+                method: "GET"
+            ));
 
             return Ok(result);
         }
@@ -89,27 +102,27 @@ namespace rest.Controllers.v1
             if (movie == null)
                 return NotFound();
 
-            var result = new SingleResult<Movie>(movie);
+            var result = new MovieHateoasDto(movie);
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetById), new { id }) ?? string.Empty,
                 rel: "self",
                 method: "GET"
             ));
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(Put), new { id }) ?? string.Empty,
                 rel: "update",
                 method: "PUT"
             ));
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(Delete), new { id }) ?? string.Empty,
                 rel: "delete",
                 method: "DELETE"
             ));
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetAll)) ?? string.Empty,
                 rel: "collection",
                 method: "GET"
@@ -135,25 +148,25 @@ namespace rest.Controllers.v1
 
             var created = await _repository.AddAsync(movie);
 
-            var result = new SingleResult<Movie>(created);
+            var result = new MovieHateoasDto(created);
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetById), new { id = created.Id }) ?? string.Empty,
                 rel: "self",
                 method: "GET"
             ));
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(Put), new { id = created.Id }) ?? string.Empty,
                 rel: "update",
                 method: "PUT"
             ));
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(Delete), new { id = created.Id }) ?? string.Empty,
                 rel: "delete",
                 method: "DELETE"
             ));
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetAll)) ?? string.Empty,
                 rel: "collection",
                 method: "GET"
@@ -167,7 +180,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<SingleResult<Movie>>> Put(int id, [FromBody] MovieDto movie)
+        public async Task<ActionResult> Put(int id, [FromBody] MovieDto movie)
         {
             if (id <= 0) return BadRequest("ID must be a positive number.");
             movie.Title = _sanitizer.Sanitize(movie.Title);
@@ -176,21 +189,21 @@ namespace rest.Controllers.v1
             Movie? updatedMovie = await _repository.UpdateAsync(id, movie);
             if (updatedMovie == null) return NotFound();
 
-            SingleResult<Movie?> result = new(updatedMovie);
+            var result = new MovieHateoasDto(updatedMovie);
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetById), new { id }) ?? string.Empty,
                 rel: "self",
                 method: "GET"
             ));
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(Delete), new { id = updatedMovie.Id }) ?? string.Empty,
                 rel: "delete",
                 method: "DELETE"
             ));
 
-            result._links.Add(new Link(
+            result.Links.Add(new Link(
                 href: Url.Action(nameof(GetAll)) ?? string.Empty,
                 rel: "collection",
                 method: "GET"
