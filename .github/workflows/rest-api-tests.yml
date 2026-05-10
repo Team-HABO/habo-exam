@@ -23,9 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      Auth0_Domain: ${{ secrets.AUTH0_DOMAIN }}
+      Auth0_Audience: ${{ secrets.AUTH0_AUDIENCE }}
       Auth0_ClientId: ${{ secrets.AUTH0_CLIENT_ID }}
       Auth0_ClientSecret: ${{ secrets.AUTH0_CLIENT_SECRET }}
+      Auth0_Authority: ${{ secrets.AUTH0_AUTHORITY }}
+      Auth0_Domain: ${{ secrets.AUTH0_DOMAIN }}
     services:
       redis:
         image: redis:alpine
