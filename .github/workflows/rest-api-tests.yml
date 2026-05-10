@@ -62,7 +62,7 @@ jobs:
           sleep 15
 
       - name: Verify API is running
-        run: curl http://localhost:8080
+        run: curl http://localhost:5286
 
       - name: Install Newman
         run: npm install -g newman
@@ -71,7 +71,7 @@ jobs:
         run: |
           newman run tests/postman/your_collection.json \
           -e tests/postman/REST-API-v1.postman_environment.json \
-          --env-var "baseUrl=http://localhost:8080" \
+          --env-var "baseUrl=http://localhost:5286" \
           --env-var "auth0_username=${{ secrets.AUTH0_USERNAME }}" \
           --env-var "auth0_password=${{ secrets.AUTH0_PASSWORD }}"
 
