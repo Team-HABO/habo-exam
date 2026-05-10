@@ -56,7 +56,7 @@ jobs:
 
       - name: Start API
         run: |
-          export ConnectionStrings__DefaultConnection="Data Source=rest/movies.db"
+          export ConnectionStrings__DefaultConnection="Data Source=movies.db"
           export REDIS_CONNECTION_STRING="127.0.0.1:6379"
           dotnet run --project rest/rest.csproj &
           sleep 15
