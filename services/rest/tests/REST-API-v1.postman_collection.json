@@ -1,0 +1,2054 @@
+{
+  "info": {
+    "_postman_id": "1d086f08-d230-48b4-ae8f-9fd630fd2bcd",
+    "name": "REST API v1 - Movies, Directors, Production Companies",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25638427",
+    "_collection_link": "https://go.postman.co/collection/25638427-1d086f08-d230-48b4-ae8f-9fd630fd2bcd?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Movies - Get All Before login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=1&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Auth - Get JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const token = response.access_token;",
+                  "",
+                  "pm.test(\"Token is not empty\", function () {",
+                  "    pm.expect(token).to.not.be.empty;",
+                  "});",
+                  "if (token) {",
+                  "    // 2. JWTs are: [header].[payload].[signature]",
+                  "    const parts = token.split('.');",
+                  "    ",
+                  "    // 3. Decode the payload (index 1) using Base64",
+                  "    const payload = JSON.parse(atob(parts[1]));",
+                  "    pm.collectionVariables.set(\"jwt\", response.access_token);",
+                  "    console.log(\"Access Token saved successfully!\");",
+                  "    ",
+                  "    // 4. Save the JTI to a collection variable",
+                  "    if (payload.jti) {",
+                  "        pm.collectionVariables.set(\"current_jti\", payload.jti);",
+                  "        console.log(\"JTI Extracted:\", payload.jti);",
+                  "    } else {",
+                  "        console.warn(\"JTI claim not found in token. Ensure RFC 9068 is enabled in Auth0.\");",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{auth0_username}}\",\n  \"password\": \"{{auth0_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Directors",
+      "item": [
+        {
+          "name": "Directors - Get All (page 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "const directors = body._embedded.directors;",
+                  "",
+                  "pm.test(\"Returns embedded directors\", function () {",
+                  "    pm.expect(body._embedded).to.be.an(\"object\");",
+                  "    pm.expect(directors).to.be.an(\"array\");",
+                  "    pm.expect(body._links).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Pagination metadata matches request\", function () {",
+                  "    pm.expect(body.page).to.equal(1);",
+                  "    pm.expect(body.pageSize).to.equal(Number(pm.collectionVariables.get(\"pageSize\")));",
+                  "});",
+                  "",
+                  "pm.test(\"Includes base pagination links\", function () {",
+                  "    const rels = body._links.map(function (link) {",
+                  "        return link.rel;",
+                  "    });",
+                  "",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"first\");",
+                  "    pm.expect(rels).to.include(\"last\");",
+                  "    pm.expect(rels).to.include(\"search\");",
+                  "",
+                  "    if (body.totalPages > 1) {",
+                  "        pm.expect(rels).to.include(\"next\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Search link is a valid templated URI\", function () {",
+                  "    const searchLink = body._links.find(function (link) {",
+                  "        return link.rel === \"search\";",
+                  "    });",
+                  "",
+                  "    pm.expect(searchLink).to.exist;",
+                  "    pm.expect(searchLink.method).to.equal(\"GET\");",
+                  "    pm.expect(searchLink.templated).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test(\"Each director has a self link\", function () {",
+                  "    directors.forEach(function (director) {",
+                  "",
+                  "        pm.expect(director._links).to.be.an(\"array\");",
+                  "        const selfLink = director._links.find(function (link) {",
+                  "            return link.rel === \"self\";",
+                  "        });",
+                  "",
+                  "        pm.expect(selfLink).to.exist;",
+                  "        pm.expect(selfLink.method).to.equal(\"GET\");",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"Directors are not empty\", function () {",
+                  "    pm.expect(directors.length).to.be.greaterThan(0);",
+                  "});",
+                  "",
+                  "if (directors.length > 0) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"firstDirectorId\",",
+                  "        String(directors[0].id)",
+                  "    );",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors?page=1&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Directors - Get All (page 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "const directors = body._embedded.directors;",
+                  "pm.test(\"Second page is returned\", function () {",
+                  "    pm.expect(body.page).to.equal(2);",
+                  "    pm.expect(body.pageSize).to.equal(Number(pm.collectionVariables.get(\"pageSize\")));",
+                  "    pm.expect(directors).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Includes prev link on page 2\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"first\");",
+                  "    pm.expect(rels).to.include(\"last\");",
+                  "    pm.expect(rels).to.include(\"prev\");",
+                  "    if (body.totalPages > body.page) {",
+                  "        pm.expect(rels).to.include(\"next\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors?page=2&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Directors - Get All (invalid page)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors?page=0&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Directors - Get All (invalid pageSize)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors?page=1&pageSize=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Directors - Get All (search)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "const directors = body._embedded.directors;",
+                  "pm.test(\"Returns paginated data\", function () {",
+                  "    pm.expect(directors).to.be.an(\"array\");",
+                  "    pm.expect(body._links).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Includes base pagination links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"first\");",
+                  "    pm.expect(rels).to.include(\"last\");",
+                  "    if (body.totalPages > 1) {",
+                  "        pm.expect(rels).to.include(\"next\");",
+                  "    }",
+                  "});",
+                  "pm.test(\"Data array has exactly 2 items\", function () {",
+                  "    pm.expect(directors).to.be.an(\"array\").and.to.have.lengthOf(2);",
+                  "});",
+                  "",
+                  "pm.test(\"Links contain search\", function () {",
+                  "    const search = pm.request.url.query.get(\"search\");",
+                  "    const links = body._links.map(function (link) { return link.href; });",
+                  "    console.log(links);",
+                  "    pm.expect(links[0]).to.include(search);",
+                  "    pm.expect(links[0]).to.include(\"search\");",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors?page=1&pageSize={{pageSize}}&search=Sco",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                },
+                {
+                  "key": "search",
+                  "value": "Sco"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Directors - Get By Id (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Returns a single director\", function () {",
+                  "    pm.expect(body).to.be.an(\"object\");",
+                  "    pm.expect(body.id).to.equal(Number(pm.collectionVariables.get(\"firstDirectorId\")));",
+                  "});",
+                  "pm.test(\"Includes self and collection links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"collection\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors/{{firstDirectorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors",
+                "{{firstDirectorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Directors - Get By Id (not found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors/2147483647",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors",
+                "2147483647"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Directors - Get By Id (invalid id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/directors/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "directors",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ProductionCompanies",
+      "item": [
+        {
+          "name": "ProductionCompanies - Get All (page 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "const companies = body._embedded.productionCompanies;",
+                  "",
+                  "pm.test(\"Returns paginated data\", function () {",
+                  "    pm.expect(companies).to.be.an(\"array\");",
+                  "    pm.expect(body._links).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Pagination metadata matches request\", function () {",
+                  "    pm.expect(body.page).to.equal(1);",
+                  "    pm.expect(body.pageSize).to.equal(Number(pm.collectionVariables.get(\"pageSize\")));",
+                  "});",
+                  "pm.test(\"Includes base pagination links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"first\");",
+                  "    pm.expect(rels).to.include(\"last\");",
+                  "    if (body.totalPages > 1) {",
+                  "        pm.expect(rels).to.include(\"next\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Search link is a valid templated URI\", function () {",
+                  "    const searchLink = body._links.find(function (link) {",
+                  "        return link.rel === \"search\";",
+                  "    });",
+                  "",
+                  "    pm.expect(searchLink).to.exist;",
+                  "    pm.expect(searchLink.method).to.equal(\"GET\");",
+                  "    pm.expect(searchLink.templated).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test(\"Each productionCompany has a self link\", function () {",
+                  "",
+                  "",
+                  "    companies.forEach(function (pc) {",
+                  "",
+                  "        pm.expect(pc._links).to.be.an(\"array\");",
+                  "        const selfLink = pc._links.find(function (link) {",
+                  "            return link.rel === \"self\";",
+                  "        });",
+                  "",
+                  "        pm.expect(selfLink).to.exist;",
+                  "        pm.expect(selfLink.method).to.equal(\"GET\");",
+                  "    });",
+                  "});",
+                  "pm.test(\"productionCompanies is not empty\", function () {",
+                  "    pm.expect(companies.length).to.be.greaterThan(0);",
+                  "});",
+                  "pm.test(\"Links does not contain search\", function () {",
+                  "    const links = body._links.map(function (link) { return link.href; });",
+                  "    console.log(links);",
+                  "    pm.expect(links[0]).to.not.include(\"search\")",
+                  "})",
+                  "if (companies.length > 0) {",
+                  "    pm.collectionVariables.set(\"firstProductionCompanyId\", String(companies[0].id));",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies?page=1&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ProductionCompanies - Get All (page 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "const companies = body._embedded.productionCompanies;",
+                  "",
+                  "pm.test(\"Second page is returned\", function () {",
+                  "    pm.expect(body.page).to.equal(2);",
+                  "    pm.expect(body.pageSize).to.equal(Number(pm.collectionVariables.get(\"pageSize\")));",
+                  "    pm.expect(companies).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Includes prev link on page 2\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"first\");",
+                  "    pm.expect(rels).to.include(\"last\");",
+                  "    pm.expect(rels).to.include(\"prev\");",
+                  "    if (body.totalPages > body.page) {",
+                  "        pm.expect(rels).to.include(\"next\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies?page=2&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ProductionCompanies - Get All (invalid page)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies?page=0&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ProductionCompanies - Get All (invalid pageSize)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies?page=1&pageSize=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ProductionCompanies - Get All (search)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "const companies = body._embedded.productionCompanies;",
+                  "",
+                  "pm.test(\"Returns paginated data\", function () {",
+                  "    pm.expect(companies).to.be.an(\"array\");",
+                  "    pm.expect(body._links).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Data array has exactly 2 items\", function () {",
+                  "    pm.expect(companies).to.be.an(\"array\").and.to.have.lengthOf(2);",
+                  "});",
+                  "",
+                  "pm.test(\"Links contain search\", function () {",
+                  "    const search = pm.request.url.query.get(\"search\");",
+                  "    const links = body._links.map(function (link) { return link.href; });",
+                  "    console.log(links);",
+                  "    pm.expect(links[0]).to.include(search);",
+                  "    pm.expect(links[0]).to.include(\"search\");",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies?page=1&pageSize={{pageSize}}&search=Pictures",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                },
+                {
+                  "key": "search",
+                  "value": "Pictures"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ProductionCompanies - Get By Id (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Returns a single production company\", function () {",
+                  "    pm.expect(body).to.be.an(\"object\");",
+                  "    pm.expect(body.id).to.equal(Number(pm.collectionVariables.get(\"firstProductionCompanyId\")));",
+                  "});",
+                  "pm.test(\"Includes self and collection links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"collection\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies/{{firstProductionCompanyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies",
+                "{{firstProductionCompanyId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ProductionCompanies - Get By Id (not found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies/2147483647",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies",
+                "2147483647"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ProductionCompanies - Get By Id (invalid id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/productioncompanies/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productioncompanies",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Movies - Get All (page 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "const movies = body._embedded.movies;",
+                  "",
+                  "pm.test(\"Returns paginated data\", function () {",
+                  "    pm.expect(movies).to.be.an(\"array\");",
+                  "    pm.expect(body._links).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Pagination metadata matches request\", function () {",
+                  "    pm.expect(body.page).to.equal(1);",
+                  "    pm.expect(body.pageSize).to.equal(Number(pm.collectionVariables.get(\"pageSize\")));",
+                  "});",
+                  "",
+                  "pm.test(\"Includes base pagination links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"first\");",
+                  "    pm.expect(rels).to.include(\"last\");",
+                  "    ",
+                  "    if (body.totalPages > 1) {",
+                  "        pm.expect(rels).to.include(\"next\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Search link is a valid templated URI\", function () {",
+                  "    const searchLink = body._links.find(function (link) {",
+                  "        return link.rel === \"search\";",
+                  "    });",
+                  "",
+                  "    pm.expect(searchLink).to.exist;",
+                  "    pm.expect(searchLink.method).to.equal(\"GET\");",
+                  "    pm.expect(searchLink.templated).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test(\"Each movie has a self link\", function () {",
+                  "    movies.forEach(function (movie) {",
+                  "        pm.expect(movie._links).to.be.an(\"array\");",
+                  "        const selfLink = movie._links.find(function (link) {",
+                  "            return link.rel === \"self\";",
+                  "        });",
+                  "",
+                  "        pm.expect(selfLink).to.exist;",
+                  "        pm.expect(selfLink.method).to.equal(\"GET\");",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"Movies list is not empty\", function () {",
+                  "    pm.expect(movies.length).to.be.greaterThan(0);",
+                  "});",
+                  "pm.test(\"Links does not contain search\", function () {",
+                  "    const links = body._links.map(function (link) { return link.href; });",
+                  "    console.log(links);",
+                  "    pm.expect(links[0]).to.not.include(\"search\")",
+                  "})",
+                  "",
+                  "if (movies.length > 0) {",
+                  "    pm.collectionVariables.set(\"firstMovieId\", String(movies[0].id));",
+                  "}",
+                  "",
+                  "pm.collectionVariables.set(\"moviesTotalBefore\", String(body.totalCount));",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=1&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get All (page 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "const movies = body._embedded.movies;",
+                  "",
+                  "pm.test(\"Second page is returned\", function () {",
+                  "    pm.expect(body.page).to.equal(2);",
+                  "    pm.expect(body.pageSize).to.equal(Number(pm.collectionVariables.get(\"pageSize\")));",
+                  "    pm.expect(movies).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Includes prev link on page 2\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"first\");",
+                  "    pm.expect(rels).to.include(\"last\");",
+                  "    pm.expect(rels).to.include(\"prev\");",
+                  "    if (body.totalPages > body.page) {",
+                  "        pm.expect(rels).to.include(\"next\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=2&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get All (invalid page)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=0&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get All (invalid pageSize)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=1&pageSize=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get All (Large page size)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "const movies = body._embedded.movies;",
+                  "",
+                  "pm.test(\"Returns paginated data\", function () {",
+                  "    pm.expect(movies).to.be.an(\"array\");",
+                  "    pm.expect(body._links).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Pagination metadata matches request\", function () {",
+                  "    pm.expect(body.page).to.equal(1);",
+                  "    pm.expect(body.pageSize).to.equal(50);",
+                  "});",
+                  "",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=1&pageSize=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get All (search)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "const movies = body._embedded.movies;",
+                  "",
+                  "pm.test(\"Returns paginated data\", function () {",
+                  "    pm.expect(movies).to.be.an(\"array\");",
+                  "    pm.expect(body._links).to.be.an(\"array\");",
+                  "});",
+                  "pm.test(\"Data array has exactly 3 items\", function () {",
+                  "    pm.expect(movies).to.be.an(\"array\").and.to.have.lengthOf(3);",
+                  "});",
+                  "pm.test(\"Links contain search\", function () {",
+                  "    const search = pm.request.url.query.get(\"search\");",
+                  "    const links = body._links.map(function (link) { return link.href; });",
+                  "    console.log(links);",
+                  "    pm.expect(links[0]).to.include(search);",
+                  "    pm.expect(links[0]).to.include(\"search\");",
+                  "})",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=1&pageSize={{pageSize}}&search=lord",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                },
+                {
+                  "key": "search",
+                  "value": "lord"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get By Id (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Returns a single movie\", function () {",
+                  "    pm.expect(body).to.be.an(\"object\");",
+                  "    pm.expect(body.id).to.equal(Number(pm.collectionVariables.get(\"firstMovieId\")));",
+                  "});",
+                  "pm.test(\"Includes self, update, delete, and collection links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"update\");",
+                  "    pm.expect(rels).to.include(\"delete\");",
+                  "    pm.expect(rels).to.include(\"collection\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/{{firstMovieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "{{firstMovieId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get By Id (not found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/2147483647",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "2147483647"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get By Id (invalid id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Create (invalid body)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"releaseYear\": \"20\",\n  \"genre\": \"\",\n  \"directorID\": 0,\n  \"productionCompanyID\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Create (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Returns the created movie\", function () {",
+                  "    pm.expect(body).to.be.an(\"object\");",
+                  "    pm.expect(body.title).to.equal(\"Postman Test Movie\");",
+                  "});",
+                  "pm.test(\"Includes self, update, delete, and collection links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"update\");",
+                  "    pm.expect(rels).to.include(\"delete\");",
+                  "    pm.expect(rels).to.include(\"collection\");",
+                  "});",
+                  "pm.collectionVariables.set(\"createdMovieId\", String(body.id));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Test Movie\",\n  \"releaseYear\": \"2026\",\n  \"genre\": \"Drama\",\n  \"directorID\": {{firstDirectorId}},\n  \"productionCompanyID\": {{firstProductionCompanyId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get All After Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "const beforeCount = Number(pm.collectionVariables.get(\"moviesTotalBefore\"));",
+                  "pm.test(\"Collection grows by one after creating a movie\", function () {",
+                  "    pm.expect(body.totalCount).to.equal(beforeCount + 1);",
+                  "});",
+                  "pm.collectionVariables.set(\"moviesTotalAfter\", String(body.totalCount));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=1&pageSize={{largePageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{largePageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Update (invalid body)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"releaseYear\": \"20\",\n  \"genre\": \"\",\n  \"directorID\": 0,\n  \"productionCompanyID\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/{{createdMovieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "{{createdMovieId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Update (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Returns the updated movie\", function () {",
+                  "    pm.expect(body.id).to.equal(Number(pm.collectionVariables.get(\"createdMovieId\")));",
+                  "    pm.expect(body.title).to.equal(\"Postman Test Movie Updated\");",
+                  "});",
+                  "pm.test(\"Includes self, delete, and collection links\", function () {",
+                  "    const rels = body._links.map(function (link) { return link.rel; });",
+                  "    pm.expect(rels).to.include(\"self\");",
+                  "    pm.expect(rels).to.include(\"delete\");",
+                  "    pm.expect(rels).to.include(\"collection\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Test Movie Updated\",\n  \"releaseYear\": \"2027\",\n  \"genre\": \"Drama\",\n  \"directorID\": {{firstDirectorId}},\n  \"productionCompanyID\": {{firstProductionCompanyId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/{{createdMovieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "{{createdMovieId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Delete (not found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/2147483647",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "2147483647"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Delete (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/{{createdMovieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "{{createdMovieId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get Deleted Movie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/{{createdMovieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "{{createdMovieId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Logout",
+      "item": [
+        {
+          "name": "logout Copy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Get the access token from the response\r",
+                  "const response = pm.response.json();\r",
+                  "const token = response.access_token;\r",
+                  "\r",
+                  "if (token) {\r",
+                  "    pm.collectionVariables.set(\"jwt\", token);\r",
+                  "    console.log(\"Access Token saved successfully!\");\r",
+                  "    // 2. JWTs are: [header].[payload].[signature]\r",
+                  "    const parts = token.split('.');\r",
+                  "    \r",
+                  "    // 3. Decode the payload (index 1) using Base64\r",
+                  "    const payload = JSON.parse(atob(parts[1]));\r",
+                  "    \r",
+                  "    // 4. Save the JTI to a collection variable\r",
+                  "    if (payload.jti) {\r",
+                  "        pm.collectionVariables.set(\"current_jti\", payload.jti);\r",
+                  "        console.log(\"JTI Extracted:\", payload.jti);\r",
+                  "    } else {\r",
+                  "        console.warn(\"JTI claim not found in token. Ensure RFC 9068 is enabled in Auth0.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout/{{current_jti}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout",
+                "{{current_jti}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Movies - Get All afterlogout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies?page=1&pageSize={{pageSize}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "{{pageSize}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5286"
+    },
+    {
+      "key": "pageSize",
+      "value": "10"
+    },
+    {
+      "key": "largePageSize",
+      "value": "50"
+    },
+    {
+      "key": "firstDirectorId",
+      "value": ""
+    },
+    {
+      "key": "firstProductionCompanyId",
+      "value": ""
+    },
+    {
+      "key": "firstMovieId",
+      "value": ""
+    },
+    {
+      "key": "moviesTotalBefore",
+      "value": ""
+    },
+    {
+      "key": "moviesTotalAfter",
+      "value": ""
+    },
+    {
+      "key": "createdMovieId",
+      "value": ""
+    },
+    {
+      "key": "jwt",
+      "value": ""
+    },
+    {
+      "key": "current_jti",
+      "value": ""
+    }
+  ]
+}

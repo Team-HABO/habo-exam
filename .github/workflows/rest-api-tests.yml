@@ -2,72 +2,76 @@ name: Service REST CI
 
 on:
   workflow_call:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "services/rest/**"
   pull_request:
     branches:
       - main
     paths:
       - "services/rest/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: services/rest
 
 jobs:
   automated-api-tests:
     runs-on: ubuntu-latest
-
+    
+    env:
+      Auth0_Audience: ${{ secrets.AUTH0_AUDIENCE }}
+      Auth0_ClientId: ${{ secrets.AUTH0_CLIENT_ID }}
+      Auth0_ClientSecret: ${{ secrets.AUTH0_CLIENT_SECRET }}
+      Auth0_Authority: ${{ secrets.AUTH0_AUTHORITY }}
+      Auth0_Domain: ${{ secrets.AUTH0_DOMAIN }}
     services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: testdb
+      redis:
+        image: redis:alpine
         ports:
-          - 5432:5432
+          - 6379:6379
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
           --health-timeout 5s
           --health-retries 5
 
-    env:
-      DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - name: Install dependencies
-        working-directory: services/rest
-        run: npm ci
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
 
-      - name: Run migration and seeder
-        working-directory: services/rest
-        run: npm run prepare
+      - name: Restore NuGet packages
+        run: dotnet restore rest/rest.csproj 
 
-      - name: Run REST API in background
-        working-directory: services/rest
+      - name: Build REST API
+        run: dotnet build rest/rest.csproj -c Release --no-restore
+
+      - name: Start API
         run: |
-          npm start > /tmp/rest-api.log 2>&1 &
-          echo "API PID: $!"
+          export ConnectionStrings__DefaultConnection="Data Source=movies.db"
+          export REDIS_CONNECTION_STRING="127.0.0.1:6379"
+          export ASPNETCORE_URLS="http://localhost:5286"
+          dotnet run --project rest/rest.csproj &
+          sleep 15
 
-      - name: Wait for REST API
+      - name: Verify API is running
+        run: curl http://localhost:5286
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run API Tests
         run: |
-          for i in {1..15}; do
-            if curl -sSf http://localhost:3000/authors > /dev/null; then
-              echo "REST API is ready"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "REST API failed to start"
-          cat /tmp/rest-api.log
-          exit 1
-
-      - name: Install Postman CLI
-        run: |
-          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
-
-      - name: Login to Postman CLI
-        run: postman login --with-api-key ${{ secrets.REST_POSTMAN_API_KEY }}
-
-      - name: Run API tests
-        run: |
-          postman collection run "48703513-142b47eb-5990-44ff-8190-b7531a8632cd"
+          newman run tests/REST-API-v1.postman_collection.json \
+          -e tests/REST-API-v1.postman_environment.json \
+          --env-var "baseUrl=http://localhost:5286" \
+          --env-var "auth0_username=${{ secrets.AUTH0_USERNAME }}" \
+          --env-var "auth0_password=${{ secrets.AUTH0_PASSWORD }}"
