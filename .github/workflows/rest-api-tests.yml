@@ -58,6 +58,7 @@ jobs:
         run: |
           export ConnectionStrings__DefaultConnection="Data Source=movies.db"
           export REDIS_CONNECTION_STRING="127.0.0.1:6379"
+          export ASPNETCORE_URLS="http://localhost:5286"
           dotnet run --project rest/rest.csproj &
           sleep 15
 
@@ -74,7 +75,3 @@ jobs:
           --env-var "baseUrl=http://localhost:5286" \
           --env-var "auth0_username=${{ secrets.AUTH0_USERNAME }}" \
           --env-var "auth0_password=${{ secrets.AUTH0_PASSWORD }}"
-
-      - name: Print API logs
-        if: failure()
-        run: cat api.log

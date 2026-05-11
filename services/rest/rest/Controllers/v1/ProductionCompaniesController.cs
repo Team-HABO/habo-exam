@@ -72,11 +72,14 @@ namespace rest.Controllers.v1
                     rel: "next",
                     method: "GET"
                 ));
-            result.Links.Add(new Link(
-                href: $"/api/v1/ProductCompanies?search={{search}}",
+            var searchLink = new Link(
+                href: "/api/v1/ProductCompanies{?search}",
                 rel: "search",
                 method: "GET"
-            ));
+            );
+            searchLink.Templated = true;
+            result.Links.Add(searchLink);
+
             return Ok(result);
         }
 

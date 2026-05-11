@@ -82,11 +82,13 @@ namespace rest.Controllers.v1
                     method: "GET"
                 ));
             }
-            result.Links.Add(new Link(
-                href: $"/api/v1/Movies?search={{search}}",
+            var searchLink = new Link(
+                href: "/api/v1/Movies{?search}",
                 rel: "search",
                 method: "GET"
-            ));
+            );
+            searchLink.Templated = true;
+            result.Links.Add(searchLink);
 
             return Ok(result);
         }

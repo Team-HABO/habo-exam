@@ -73,12 +73,13 @@ namespace rest.Controllers.v1
                     rel: "next",
                     method: "GET"
                 ));
-            //Search must be there
-            result.Links.Add(new Link(
-                href: $"/api/v1/Directors?search={{search}}",
+            var searchLink = new Link(
+                href: "/api/v1/Directors{?search}",
                 rel: "search",
                 method: "GET"
-            ));
+            );
+            searchLink.Templated = true;
+            result.Links.Add(searchLink);
             return Ok(result);
         }
 

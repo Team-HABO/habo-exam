@@ -1,7 +1,4 @@
-﻿using rest.Models;
-using System.Security.Claims;
-
-namespace rest.Services
+﻿namespace rest.Services
 {
     public interface ITokenService
     {

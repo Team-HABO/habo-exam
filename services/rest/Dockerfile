@@ -1,6 +1,7 @@
 ARG APP_UID=1000
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+ARG APP_UID=1000
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
