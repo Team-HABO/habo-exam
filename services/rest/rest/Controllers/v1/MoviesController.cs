@@ -98,7 +98,7 @@ namespace rest.Controllers.v1
         {
             var movie = await _repository.GetByIdAsync(id);
             if (movie == null)
-                return NotFound(new { message = "Id does not exist in database" } );
+                return NotFound(new { message = "Movie with the specified ID was not found." } );
 
             var result = new MovieHateoasDto(movie);
 
@@ -184,9 +184,9 @@ namespace rest.Controllers.v1
             movie.Genre = _sanitizer.Sanitize(movie.Genre);
 
             Movie? updatedMovie = await _repository.UpdateAsync(id, movie);
-            if (updatedMovie == null) return NotFound(new { message = "Id does not exist in database" } );
+            if (updatedMovie == null) return NotFound(new { message = "Movie with the specified ID was not found." } );
 
-            var result = new MovieHateoasDto(updatedMovie);
+            var result = new MovieHateoasDto(updatedMovie); 
 
             result.Links.Add(new Link(
                 href: Url.Action(nameof(GetById), new { id }) ?? string.Empty,
@@ -220,7 +220,7 @@ namespace rest.Controllers.v1
 
             if (!deleted)
             {
-                return NotFound(new { message = "Id does not exist in database" } ); 
+                return NotFound(new { message = "Movie with the specified ID was not found." } ); 
             }
 
             return NoContent();

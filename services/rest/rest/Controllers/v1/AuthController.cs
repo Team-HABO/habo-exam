@@ -73,7 +73,7 @@ namespace rest.Controllers.v1
             {
                 var remaining = DateTimeOffset.FromUnixTimeSeconds(expUnix) - DateTimeOffset.UtcNow;
                 if (remaining <= TimeSpan.Zero)
-                    return BadRequest(new { error = "Token is already expired." });
+                    return BadRequest(new { message = "Token is already expired." });
 
                 expiry = remaining;
             }

@@ -62,7 +62,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponseError'
+                $ref: '#/components/schemas/ErrorResponseMessage'
         "401":
           description: Unauthorized or malformed token
           content:
@@ -493,7 +493,7 @@ components:
           maxLength: 200
         releaseYear:
           type: string
-          pattern: '^\\d{4}$'
+          pattern: '^\d{4}$'
         genre:
           type: string
           maxLength: 60
