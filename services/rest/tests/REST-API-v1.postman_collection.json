@@ -1685,6 +1685,50 @@
           "response": []
         },
         {
+          "name": "Movies - Update (not found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Test Movie Updated\",\n  \"releaseYear\": \"2027\",\n  \"genre\": \"Drama\",\n  \"directorID\": {{firstDirectorId}},\n  \"productionCompanyID\": {{firstProductionCompanyId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/763682",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "763682"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Movies - Update (valid)",
           "event": [
             {
@@ -1774,6 +1818,41 @@
           "response": []
         },
         {
+          "name": "Movies - Delete (invalid id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/movies/a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "movies",
+                "a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Movies - Delete (valid)",
           "event": [
             {
@@ -1845,7 +1924,7 @@
       "name": "Logout",
       "item": [
         {
-          "name": "logout Copy",
+          "name": "logout",
           "event": [
             {
               "listen": "test",
