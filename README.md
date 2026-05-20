@@ -7,7 +7,8 @@ Monorepo containing multiple API styles that implement a shared library domain.
 - REST service: [services/rest](services/rest)
 - GraphQL service: [services/graph](services/graph)
 - SOAP service: [services/soap](services/soap)
-- gRPC folder: [services/grpc](services/grpc)
+- gRPC service: [services/grpc](services/grpc)
+- WebSocket service: [services/websocket](services/websocket)
 
 ## Repository Structure
 
@@ -17,6 +18,7 @@ Monorepo containing multiple API styles that implement a shared library domain.
 │   ├── rest/
 │   ├── graph/
 │   ├── soap/
-│   └── grpc/
+│   ├── grpc/
+│   └── websocket/
 └── .github/workflows/
 ```

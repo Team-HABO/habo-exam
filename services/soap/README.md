@@ -1,6 +1,6 @@
-# SOAP Library Service
+# SOAP Artist Service
 
-A SOAP web service for managing a library — books, authors, and publishing companies. Built with ASP.NET Core (.NET 9) and [SoapCore](https://github.com/DigDes/SoapCore), using SQLite as the database.
+A SOAP web service for managing artists. Built with ASP.NET Core (.NET 10) and [SoapCore](https://github.com/DigDes/SoapCore), using PostgreSQL as the database.
 
 ---
 
@@ -15,12 +15,12 @@ A SOAP web service for managing a library — books, authors, and publishing com
 
 ### Key concepts
 
-| Term | What it means |
-|------|--------------|
-| **WSDL** | An XML file that describes every operation the service offers, including input/output types. Clients use it to know how to call the service. |
-| **SOAP Envelope** | The XML wrapper around every message. Contains a `Header` (optional metadata) and a `Body` (the actual request or response). |
-| **Operation** | A single callable action on the service (e.g. `CreateBook`, `GetBookById`). |
-| **Fault** | A typed error returned by the service when something goes wrong (e.g. `ValidationFault`, `NotFoundFault`). |
+| Term              | What it means                                                                                                                                |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **WSDL**          | An XML file that describes every operation the service offers, including input/output types. Clients use it to know how to call the service. |
+| **SOAP Envelope** | The XML wrapper around every message. Contains a `Header` (optional metadata) and a `Body` (the actual request or response).                 |
+| **Operation**     | A single callable action on the service (e.g. `CreateArtist`, `GetArtistById`).                                                              |
+| **Fault**         | A typed error returned by the service when something goes wrong (e.g. `ValidationFault`, `NotFoundFault`).                                   |
 
 A minimal SOAP request looks like this:
 
@@ -29,9 +29,9 @@ A minimal SOAP request looks like this:
                   xmlns:lib="http://example.com/library/wsdl">
   <soapenv:Header/>
   <soapenv:Body>
-    <lib:GetBookById>
-      <lib:NBookId>1</lib:NBookId>
-    </lib:GetBookById>
+    <lib:GetArtistById>
+      <lib:ArtistId>1</lib:ArtistId>
+    </lib:GetArtistById>
   </soapenv:Body>
 </soapenv:Envelope>
 ```
@@ -40,11 +40,12 @@ A minimal SOAP request looks like this:
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Runtime | .NET 9 (ASP.NET Core) |
-| SOAP framework | [SoapCore](https://github.com/DigDes/SoapCore) |
-| Database | SQLite via Entity Framework Core |
+| Layer              | Technology                                               |
+| ------------------ | -------------------------------------------------------- |
+| Runtime            | .NET 10 (ASP.NET Core)                                   |
+| SOAP framework     | [SoapCore](https://github.com/DigDes/SoapCore)           |
+| Database           | PostgreSQL via Entity Framework Core (Npgsql)            |
+| Input sanitization | [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) |
 
 ---
 
@@ -53,20 +54,20 @@ A minimal SOAP request looks like this:
 ```
 soap/
 ├── Services/
-│   ├── ILibraryService.cs   # SOAP contract — defines all operations
-│   └── LibraryService.cs    # Implementation of the operations
+│   ├── IArtistService.cs    # SOAP contract — defines all operations
+│   └── ArtistService.cs     # Implementation of the operations
 ├── Models/
-│   ├── Contracts.cs         # Request/response data shapes
-│   ├── Tbook.cs             # Book database model
-│   ├── Tauthor.cs           # Author database model
-│   └── Tpublishingcompany.cs# Publishing company database model
-├── Data/
-│   └── AppDbContext.cs      # Entity Framework database context
-├── Docs/
-│   ├── ILibraryService.wsdl # WSDL contract file
-│   ├── ILibraryService.xsd  # XML schema for data types
-│   └── SOAP - Library Service.postman_collection.json
+│   ├── Artist.cs            # Artist database model
+│   └── Contracts.cs         # Request/response data shapes and fault types
+├── data/
+│   ├── AppDbContext.cs      # Entity Framework database context
+│   └── DbSeeder.cs         # Seeds initial artist data
+├── docs/
+│   ├── IArtistService.wsdl  # WSDL contract file
+│   └── soap.postman_collection.json
+├── Migrations/              # EF Core database migrations
 ├── Program.cs               # App entry point and configuration
+├── Dockerfile               # Docker build definition
 └── soap.csproj
 ```
 
@@ -76,21 +77,31 @@ soap/
 
 ### Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- A PostgreSQL instance (set the connection string via the `CONNECTION_STRING` environment variable)
 
 ### Run the service
 
 ```bash
 cd services/soap
-dotnet run
+CONNECTION_STRING="Host=localhost;Database=soap;Username=postgres;Password=secret" dotnet run
 ```
 
-The service starts on `http://localhost:5000` by default (see [Properties/launchSettings.json](Properties/launchSettings.json) for the exact port).
+The service starts on `http://localhost:5292` by default (see [Properties/launchSettings.json](Properties/launchSettings.json) for the exact port).
+
+On startup the service automatically applies pending EF Core migrations and seeds the database with sample artist data if the table is empty.
+
+### Run with Docker
+
+```bash
+docker build -t soap-service .
+docker run -e CONNECTION_STRING="Host=host.docker.internal;Database=soap;Username=postgres;Password=secret" -p 8080:8080 soap-service
+```
 
 ### Verify it is running
 
 ```
-GET http://localhost:5000/health
+GET http://localhost:5292/health
 ```
 
 Should return `healthy`.
@@ -102,14 +113,14 @@ Should return `healthy`.
 All SOAP calls go to a **single URL** using HTTP POST:
 
 ```
-POST http://localhost:5000/LibraryService.asmx
+POST http://localhost:5292/ArtistService.asmx
 Content-Type: text/xml
 ```
 
 The WSDL (service description) is available at:
 
 ```
-http://localhost:5000/LibraryService.asmx?wsdl
+http://localhost:5292/ArtistService.asmx?wsdl
 ```
 
 You can paste this URL into tools like SoapUI or Postman to automatically generate request templates for every operation.
@@ -118,69 +129,46 @@ You can paste this URL into tools like SoapUI or Postman to automatically genera
 
 ## Available Operations
 
-### Books
+### Artists
 
-| Operation | Description |
-|-----------|-------------|
-| `CreateBook` | Add a new book. Returns the new book's ID. |
-| `GetBookById` | Retrieve a book by its ID. |
-| `UpdateBook` | Update one or more fields of an existing book. |
-| `DeleteBook` | Remove a book by its ID. Returns the deleted book. |
+| Operation       | Description                                               |
+| --------------- | --------------------------------------------------------- |
+| `CreateArtist`  | Add a new artist. Returns the new artist's ID.            |
+| `GetArtistById` | Retrieve an artist by their ID.                           |
+| `ListArtists`   | Retrieve all artists.                                     |
+| `UpdateArtist`  | Update an existing artist's details.                      |
+| `DeleteArtist`  | Remove an artist by their ID. Returns the deleted artist. |
 
-#### CreateBook — example request
-
-```xml
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-                  xmlns:lib="http://example.com/library/wsdl">
-  <soapenv:Header/>
-  <soapenv:Body>
-    <lib:CreateBook>
-      <lib:CTitle>The Pragmatic Programmer</lib:CTitle>
-      <lib:NAuthorId>1</lib:NAuthorId>
-      <lib:NPublishingYear>1999</lib:NPublishingYear>
-      <lib:NPublishingCompanyId>1</lib:NPublishingCompanyId>
-    </lib:CreateBook>
-  </soapenv:Body>
-</soapenv:Envelope>
-```
-
-#### GetBookById — example request
+#### CreateArtist — example request
 
 ```xml
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
                   xmlns:lib="http://example.com/library/wsdl">
   <soapenv:Header/>
   <soapenv:Body>
-    <lib:GetBookById>
-      <lib:NBookId>1</lib:NBookId>
-    </lib:GetBookById>
+    <lib:CreateArtist>
+      <lib:FirstName>Leonardo</lib:FirstName>
+      <lib:LastName>da Vinci</lib:LastName>
+      <lib:Gender>Male</lib:Gender>
+      <lib:DateOfBirth>1452-04-15</lib:DateOfBirth>
+    </lib:CreateArtist>
   </soapenv:Body>
 </soapenv:Envelope>
 ```
 
----
+#### GetArtistById — example request
 
-### Authors
-
-| Operation | Description |
-|-----------|-------------|
-| `CreateAuthor` | Add a new author. Returns the new author's ID. |
-| `GetAuthorById` | Retrieve an author by their ID. |
-| `ListAuthors` | Retrieve all authors. |
-| `UpdateAuthor` | Update an existing author's name or surname. |
-| `DeleteAuthor` | Remove an author (fails if they have books). |
-
----
-
-### Publishing Companies
-
-| Operation | Description |
-|-----------|-------------|
-| `CreatePublishingCompany` | Add a new publishing company. Returns its ID. |
-| `GetPublishingCompanyById` | Retrieve a company by its ID. |
-| `ListPublishingCompanies` | Retrieve all publishing companies. |
-| `UpdatePublishingCompany` | Rename a publishing company. |
-| `DeletePublishingCompany` | Remove a company (fails if it has books). |
+```xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:lib="http://example.com/library/wsdl">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <lib:GetArtistById>
+      <lib:ArtistId>1</lib:ArtistId>
+    </lib:GetArtistById>
+  </soapenv:Body>
+</soapenv:Envelope>
+```
 
 ---
 
@@ -190,11 +178,11 @@ SOAP uses **Fault messages** instead of HTTP error status codes. When an operati
 
 This service uses three fault types:
 
-| Fault | When it is returned |
-|-------|-------------------|
-| `ValidationFault` | Input is invalid (e.g. empty title, invalid year) |
-| `NotFoundFault` | The requested resource does not exist |
-| `ConflictFault` | The operation would violate a constraint (e.g. deleting an author who still has books) |
+| Fault             | When it is returned                                                         |
+| ----------------- | --------------------------------------------------------------------------- |
+| `ValidationFault` | Input is invalid (e.g. empty first name, missing date of birth)             |
+| `NotFoundFault`   | The requested artist does not exist                                         |
+| `ConflictFault`   | The operation would violate a constraint (e.g. creating a duplicate artist) |
 
 All faults include an `ErrorCode` and an `ErrorMessage`. Example fault response:
 
@@ -203,11 +191,11 @@ All faults include an `ErrorCode` and an `ErrorMessage`. Example fault response:
   <soapenv:Body>
     <soapenv:Fault>
       <faultcode>soapenv:Client</faultcode>
-      <faultstring>Book not found</faultstring>
+      <faultstring>Artist not found</faultstring>
       <detail>
         <NotFoundFault>
-          <ErrorCode>BOOK_NOT_FOUND</ErrorCode>
-          <ErrorMessage>No book with ID 99.</ErrorMessage>
+          <ErrorCode>NOT_FOUND</ErrorCode>
+          <ErrorMessage>Artist with Id 99 not found.</ErrorMessage>
         </NotFoundFault>
       </detail>
     </soapenv:Fault>
@@ -222,36 +210,27 @@ All faults include an `ErrorCode` and an `ErrorMessage`. Example fault response:
 A ready-made Postman collection is included:
 
 ```
-Docs/SOAP - Library Service.postman_collection.json
+docs/soap.postman_collection.json
 ```
 
 Import it into Postman to get pre-built requests for every operation.
 
-> **Tip:** In Postman, set the request method to `POST`, the URL to `http://localhost:5000/LibraryService.asmx`, and add the header `Content-Type: text/xml` before sending.
+> **Tip:** In Postman, set the request method to `POST`, the URL to `http://localhost:5292/ArtistService.asmx`, and add the header `Content-Type: text/xml` before sending.
 
 ---
 
 ## Data Model
 
 ```
-Tbook
- ├── NBookId (int, PK)
- ├── CTitle (string)
- ├── NAuthorId (int, FK → Tauthor)
- ├── NPublishingYear (int)
- └── NPublishingCompanyId (int, FK → Tpublishingcompany)
-
-Tauthor
- ├── NAuthorId (int, PK)
- ├── CName (string)
- └── CSurname (string)
-
-Tpublishingcompany
- ├── NPublishingCompanyId (int, PK)
- └── CName (string)
+Artist
+ ├── Id (int, PK)
+ ├── FirstName (string)
+ ├── LastName (string)
+ ├── Gender (string)
+ └── DateOfBirth (DateOnly)
 ```
 
-The database is stored as a SQLite file at `data/library.db` (created automatically on first run).
+The database is PostgreSQL, configured via the `CONNECTION_STRING` environment variable. On first run the service applies migrations and seeds sample artist data (Leonardo da Vinci, Frida Kahlo, Pablo Picasso, etc.).
 
 ---
 
