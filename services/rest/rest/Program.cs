@@ -88,7 +88,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-//Add headers to request
+//Add headers to response
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Append(

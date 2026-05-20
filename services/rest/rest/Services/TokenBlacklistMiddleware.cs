@@ -15,7 +15,6 @@
                 if (jti != null && await tokenService.IsTokenBlacklistedAsync(jti))
                 {
                     context.Response.StatusCode = 401;
-                    await context.Response.WriteAsJsonAsync(new { error = "Token has been revoked." });
                     return;
                 }
             }

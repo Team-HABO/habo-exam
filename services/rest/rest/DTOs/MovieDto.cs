@@ -10,13 +10,13 @@ namespace rest.DTOs
     {
         [StringLength(200)]
         public required string Title { get; set; }
-        [RegularExpression(@"^\d{4}$", ErrorMessage = "Release Year must be exactly 4 digits.")]
+        [RegularExpression(@"^\d{4}$")]
         public required string ReleaseYear { get; set; }
         [StringLength(60)]
         public required string Genre { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "DirectorID must be a positive number.")]
+        [Range(1, int.MaxValue)]
         public int DirectorID { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "ProductionCompanyID must be a positive number.")]
+        [Range(1, int.MaxValue)]
         public int ProductionCompanyID { get; set; }
     }
 }
