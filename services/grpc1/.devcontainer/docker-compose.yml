@@ -1,9 +1,0 @@
-services:
-  grpc-chat-service:
-    container_name: grpc-chat-service
-    image: mcr.microsoft.com/devcontainers/python:3.12
-    volumes:
-      - ../../..:/workspace:cached
-    ports:
-      - "50052:50052"
-    command: sleep infinity
