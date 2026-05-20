@@ -89,7 +89,7 @@ namespace rest.Controllers.v1
         {
             var productionCompany = await _repository.GetByIdAsync(id);
             if (productionCompany == null)
-                return NotFound(new { message = "Movie with the specified ID was not found." } );
+                return NotFound(new { message = "Production company with the specified ID was not found." } );
 
             var result = new ProductionCompanyHateoasDto(productionCompany);
 

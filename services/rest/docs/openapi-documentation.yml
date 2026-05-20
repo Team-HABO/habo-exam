@@ -7,10 +7,14 @@ info:
 servers:
   - url: http://localhost:5286
 
+security:
+  - bearerAuth: []
+
 paths:
   /api/v1/Auth/login:
     post:
       summary: Authenticate a user
+      security: []
       requestBody:
         description: Credentials used to obtain an Auth0 token
         required: true
@@ -408,6 +412,11 @@ paths:
           description: Internal server error
           
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     ErrorResponseBadRequest:
       type: object

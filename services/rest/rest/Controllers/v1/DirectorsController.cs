@@ -89,7 +89,7 @@ namespace rest.Controllers.v1
         {
             var director = await _repository.GetByIdAsync(id);
             if (director == null)
-                return NotFound(new { message = "Movie with the specified ID was not found." } );
+                return NotFound(new { message = "Director with the specified ID was not found." } );
             var result = new DirectorHateoasDto(director);
 
             result.Links.Add(new Link(
