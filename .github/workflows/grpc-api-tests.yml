@@ -21,13 +21,13 @@ jobs:
 
       - name: Build Docker image
         working-directory: services/grpc
-        run: docker build -t grpc-service .
+        run: docker build -t grpc-chat-service .
 
-      - name: Run gRPC service container
+      - name: Run gRPC chat service container
         run: |
-          docker run -d --name grpc-service -p 50051:50051 grpc-service
+          docker run -d --name grpc-chat-service -p 50052:50052 grpc-chat-service
           sleep 3
-          docker logs grpc-service
+          docker logs grpc-chat-service
 
       - name: Install grpcurl
         run: go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
@@ -35,7 +35,7 @@ jobs:
       - name: Wait for gRPC service
         run: |
           for i in {1..15}; do
-            if grpcurl -plaintext localhost:50051 list 2>&1; then
+            if grpcurl -plaintext localhost:50052 list 2>&1; then
               echo "gRPC service is ready"
               exit 0
             fi
@@ -43,21 +43,21 @@ jobs:
             sleep 2
           done
           echo "gRPC service failed to start"
-          docker logs grpc-service
+          docker logs grpc-chat-service
           exit 1
 
       - name: Run gRPC tests
         run: |
-          echo "Test 1: GetBookById (existing)"
-          grpcurl -plaintext -d '{"book_id": 1000}' localhost:50051 library.LibraryService/GetBookById
+          echo "Test 1: SendMessage (valid)"
+          grpcurl -plaintext -d '{"username": "alice", "content": "Hello from CI!"}' localhost:50052 chat.ChatService/SendMessage
 
-          echo "Test 2: GetBookById (not found)"
-          grpcurl -plaintext -d '{"book_id": 999999}' localhost:50051 library.LibraryService/GetBookById 2>&1 && exit 1 || true
+          echo "Test 2: SendMessage (empty username — expect INVALID_ARGUMENT)"
+          grpcurl -plaintext -d '{"username": "", "content": "Should fail"}' localhost:50052 chat.ChatService/SendMessage 2>&1 && exit 1 || true
 
-          echo "Test 3: CreateBook"
-          grpcurl -plaintext -d '{"title": "CI Test", "author_id": 1, "publishing_company_id": 1, "publishing_year": 2024}' localhost:50051 library.LibraryService/CreateBook
+          echo "Test 3: SendMessage (empty content — expect INVALID_ARGUMENT)"
+          grpcurl -plaintext -d '{"username": "alice", "content": ""}' localhost:50052 chat.ChatService/SendMessage 2>&1 && exit 1 || true
 
-          echo "Test 4: CreateBook (invalid author)"
-          grpcurl -plaintext -d '{"title": "Bad", "author_id": 999999, "publishing_company_id": 1, "publishing_year": 2024}' localhost:50051 library.LibraryService/CreateBook 2>&1 && exit 1 || true
+          echo "Test 4: SendMessage (second valid message)"
+          grpcurl -plaintext -d '{"username": "bob", "content": "Hey alice!"}' localhost:50052 chat.ChatService/SendMessage
 
           echo "All gRPC tests passed!"
