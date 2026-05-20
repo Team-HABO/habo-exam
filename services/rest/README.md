@@ -25,7 +25,7 @@ docker compose up -d
 EF Core protects against SQL injection because it uses parameterized queries under the hood, so user input is never treated as raw SQL.
 
 ### CSRF
-An attacker tricks a user's browser into sending a request to another website. For modern APIs that store API keys in headers or use OAuth, CSRF is not a problem.
+An attacker tricks a user's browser into sending a request to another website. For modern APIs that store API keys in headers and not in cookies, CSRF is not a problem. 
 
 ### XSS (Cross-Site Scripting)
 The XSS process:
@@ -38,8 +38,13 @@ The XSS process:
 
 #### XSS Prevention
 String inputs for `Genre` and `Title` in Create and Update movie endpoints are sanitized using HtmlSanitizer (NuGet package).
+HtmlSanitizer works by:
+ - parsing the HTML input,
+ - removing dangerous tags,
+ - removing dangerous attributes,
+ - returning only safe HTML.
 
-A Content-Security-Policy (CSP) header is added to every response. It tells the browser which resources (scripts, styles, images) are allowed to be loaded and executed on a specific page.
+A Content-Security-Policy (CSP) header is added to every response. It tells the browser which resources (scripts, styles, images) are allowed to be loaded and executed on a specific page. CSP acts as an additional browser-side security layer against XSS and content injection attacks
 
 How CSP protects against XSS (three main ways):
 1. Blocking inline scripts
@@ -62,7 +67,7 @@ How CSP protects against XSS (three main ways):
 
 Common CSP directives used:
 - `default-src 'none'`: Allow nothing but HTML unless explicitly allowed (no scripts, CSS, images, API calls, fonts, WebSocket connections, etc.).
-- `frame-ancestors 'none'`: Prevent the API from being embedded (e.g., `<iframe>`, `<embed>`).
+- `frame-ancestors 'none'`: Prevent the API from being embedded (e.g., `<iframe>`, `<embed>`). This protects against clickjacking
 - `base-uri 'none'`: Prevent relative links from resolving to an attacker domain (e.g., by using a `<base href="https://evil.com">` tag).
 
 ## OAuth 2.0 (Auth0)
@@ -114,6 +119,38 @@ To check if the token is stored in Redis, use this command:
 docker exec -it <container-name> redis-cli
 127.0.0.1:6379> keys *
 ```
+
+## Headers
+### Request headers
+If a request has a body a Content-type: application/json is sent
+For authenticated endpoints a Authorization header with token is sent
+Postman automatically adds these headers to requests:
+ - Content-Type: text/plain
+    Helps the server identify the media type of the request body
+ - Content-Lentgh: 68 (Calculated when request is sent)
+    the size of the request body
+ - Host: localhost:5286 (Calculated when request is sent)
+    Domain name the request is being sent to
+ - User-Agent: PostmanRuntime/7.51.1
+    Identifies the client
+ - Accept: */*
+    Identifies what reponse content-types the client understands (*/*: client understands all)
+ - Accept-Encoding: gzip, deflate, br
+    indicates the content encoding (usually a compression algorithm) that the sender can understand
+ - Connection: keep-alive
+    tells the server too keep the underlying network connection open (allows postman to reuse the same connection for faster response times)
+
+
+### Response headers
+if a response has a body a Content-type: application/json is sent
+As mentioned in the XSS Prevention section CSP header is sent with all responses
+ASP.NET automatically adds these headers to responses
+ - Date: Tue, 19 May 2026 12:30:00 GMT 
+    When response was generated
+ - Server: Kestrel 
+    Identifies the web server software handling the request. This can leak infrastructure information, so one might remove it
+ - Transfer-Encoding: chunked 
+    Describes how the response body is transferred over HTTP. Chunked means the server sends the response in pieces, without knowing the full response size beforehand.
 
 ## Hypermedia as the Engine of Application State (HATEOAS)
 All endpoints implement HATEOAS with contextual links. It uses the HAL (Hypertext Application Language) convention.
