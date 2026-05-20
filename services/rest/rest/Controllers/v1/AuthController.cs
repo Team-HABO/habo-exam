@@ -22,6 +22,10 @@ namespace rest.Controllers.v1
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var client = _httpClientFactory.CreateClient();
@@ -40,7 +44,7 @@ namespace rest.Controllers.v1
 
             if (!response.IsSuccessStatusCode)
             {
-                return Unauthorized("Invalid credentials or Auth0 configuration error.");
+                return Unauthorized(new { error = "Invalid credentials or Auth0 configuration error." } );
             }
 
             var auth0Response = await response.Content.ReadFromJsonAsync<dynamic>();
@@ -48,6 +52,11 @@ namespace rest.Controllers.v1
         }
         [Authorize]
         [HttpPost("logout/{jwtId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Logout(string jwtId)
         {
             // Extract claims from the validated JWT (already authenticated by [Authorize])
@@ -70,7 +79,7 @@ namespace rest.Controllers.v1
             }
             else
             {
-                return Unauthorized(new { error = "Malformed token: missing expiration." });
+                return Unauthorized(new { error = "Malformed token - missing expiration." });
             }
 
             await _tokenService.BlacklistTokenAsync(jwtId, expiry);

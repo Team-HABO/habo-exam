@@ -20,16 +20,13 @@ namespace rest.Controllers.v1
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PaginatedResult<DirectorHateoasDto>>> GetAll(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery]
-            [StringLength(100)]
-            string? search = null)
+            [FromQuery][Range(1, int.MaxValue)] int page = 1,
+            [FromQuery][Range(1, int.MaxValue)] int pageSize = 10,
+            [FromQuery][StringLength(100)] string? search = null)
         {
-            if (page <= 0 || pageSize <= 0)
-                return BadRequest("Query parameters 'page' and 'pageSize' must be greater than 0.");
             PaginatedResult<DirectorHateoasDto> result = await _repository.GetAllAsync(page, pageSize, search);
             if (result.TotalCount == 0)
                 return NoContent();
@@ -86,14 +83,13 @@ namespace rest.Controllers.v1
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById([Range(1, int.MaxValue)] int id)
         {
-            if (id <= 0) return BadRequest("ID must be a positive number.");
-
             var director = await _repository.GetByIdAsync(id);
             if (director == null)
-                return NotFound();
+                return NotFound(new { message = "Director with the specified ID was not found." } );
             var result = new DirectorHateoasDto(director);
 
             result.Links.Add(new Link(
