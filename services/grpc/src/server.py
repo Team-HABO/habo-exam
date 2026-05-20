@@ -1,33 +1,36 @@
-import grpc # type: ignore 
+import grpc  # type: ignore
 from concurrent import futures
-from grpc_reflection.v1alpha import reflection # type: ignore
+from grpc_reflection.v1alpha import reflection  # type: ignore
 
-from src.generated import library_pb2
-from src.generated import library_pb2_grpc
-from src.services.library_service import LibraryService
+from src.generated import chat_pb2
+from src.generated import chat_pb2_grpc
+from src.services.chat_service import ChatService
+from src.db.database import init_db
 
-PORT = 50051
+PORT = 50052
 
 
 def serve():
-    # ThreadPoolExecutor handles concurrent RPC calls (one thread per call)
+    # Initialise the database (creates table if needed)
+    init_db()
+
+    # ThreadPoolExecutor handles concurrent RPC calls
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # Register our service implementation with the server
-    library_pb2_grpc.add_LibraryServiceServicer_to_server(LibraryService(), server)
+    chat_pb2_grpc.add_ChatServiceServicer_to_server(ChatService(), server)
 
     # Enable server reflection so tools like Bruno can auto-discover methods
     SERVICE_NAMES = (
-        library_pb2.DESCRIPTOR.services_by_name["LibraryService"].full_name,
+        chat_pb2.DESCRIPTOR.services_by_name["ChatService"].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-    # Listen on all interfaces, port 50051
     server.add_insecure_port(f"[::]:{PORT}")
     server.start()
 
-    print(f"gRPC server listening on port {PORT}")
+    print(f"gRPC Chat server listening on port {PORT}")
     server.wait_for_termination()
 
 

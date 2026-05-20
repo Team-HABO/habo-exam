@@ -14,9 +14,9 @@ RUN python -m grpc_tools.protoc \
     -I./proto \
     --python_out=./src/generated \
     --grpc_python_out=./src/generated \
-    ./proto/library.proto && \
-    sed -i 's/import library_pb2/from src.generated import library_pb2/' ./src/generated/library_pb2_grpc.py
+    ./proto/chat.proto && \
+    sed -i 's/import chat_pb2/from src.generated import chat_pb2/' ./src/generated/chat_pb2_grpc.py
 
-EXPOSE 50051
+EXPOSE 50052
 
 CMD ["python", "-m", "src.server"]

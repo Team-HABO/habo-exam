@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package chat;
+
+// The gRPC service definition — lists all RPCs clients can call
+service ChatService {
+  // Unary RPC: client sends one message, server stores it and returns the saved message
+  rpc SendMessage (SendMessageRequest) returns (SendMessageResponse);
+
+  // Bidirectional streaming RPC: client sends a stream of chat messages,
+  // server broadcasts each message to ALL connected clients in real-time
+  rpc Chat (stream ChatMessage) returns (stream ChatMessage);
+}
+
+// --- Request/Response messages ---
+
+message SendMessageRequest {
+  string username = 1;
+  string content = 2;
+}
+
+message SendMessageResponse {
+  int32 message_id = 1;
+  string timestamp = 2;
+}
+
+// --- Data messages ---
+
+message ChatMessage {
+  int32 message_id = 1;
+  string username = 2;
+  string content = 3;
+  string timestamp = 4;
+}

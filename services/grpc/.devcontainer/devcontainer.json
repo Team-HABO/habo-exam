@@ -1,8 +1,8 @@
 {
-    "name": "gRPC Service",
+    "name": "gRPC Chat Service",
     "dockerComposeFile": "docker-compose.yml",
-    "service": "grpc-service",
-    "workspaceFolder": "/workspace/services/grpc",
+    "service": "grpc-chat-service",
+    "workspaceFolder": "/workspace/services/grpc1",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -25,5 +25,5 @@
             "configureZshAsDefaultShell": true
         }
     },
-    "postCreateCommand": "pip install -r requirements.txt"
+    "postCreateCommand": "pip install -r requirements.txt && python -m grpc_tools.protoc -I./proto --python_out=./src/generated --grpc_python_out=./src/generated ./proto/chat.proto && sed -i 's/import chat_pb2/from src.generated import chat_pb2/' ./src/generated/chat_pb2_grpc.py"
 }
