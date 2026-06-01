@@ -13,16 +13,24 @@ const server = createServer((_req, res) => {
 	res.end('426 Upgrade Required — this server only accepts WebSocket connections.');
 });
 
+function parseEnvelope(raw: Buffer): { type: string; payload?: unknown } | null {
+	try {
+		const parsed = JSON.parse(raw.toString());
+		if (typeof parsed?.type !== 'string') return null;
+		return parsed as { type: string; payload?: unknown };
+	} catch {
+		return null;
+	}
+}
+
 const wss = new WebSocketServer({
 	server,
 	verifyClient({ origin }: { origin: string }) {
-		const allowed = !origin || ALLOWED_ORIGINS.some((o) => origin.startsWith(o));
-
-		if (!allowed) {
+		if (origin && !ALLOWED_ORIGINS.some((o) => origin.startsWith(o))) {
 			console.warn(`[ws] Rejected connection from disallowed origin: ${origin}`);
+			return false;
 		}
-
-		return allowed;
+		return true;
 	},
 });
 
@@ -30,39 +38,23 @@ wss.on('connection', (ws: WebSocket) => {
 	console.log(`[ws] Client connected — active: ${wss.clients.size}`);
 
 	ws.on('message', async (rawMessage) => {
-		let parsed: unknown;
+		const envelope = parseEnvelope(rawMessage as Buffer);
 
-		try {
-			parsed = JSON.parse(rawMessage.toString());
-		} catch {
-			ws.send(JSON.stringify({ type: 'error', message: 'Message must be valid JSON' }));
+		if (!envelope) {
+			ws.send(JSON.stringify({ type: 'error', message: 'Invalid message — expected JSON with a "type" field' }));
 			return;
 		}
 
-		// Validate the message envelope
-		if (
-			typeof parsed !== 'object' ||
-			parsed === null ||
-			!('type' in parsed) ||
-			typeof (parsed as Record<string, unknown>).type !== 'string'
-		) {
-			ws.send(JSON.stringify({ type: 'error', message: "Missing or invalid 'type' field" }));
-			return;
-		}
-
-		const { type, payload } = parsed as { type: string; payload?: unknown };
-
-		// Route to the correct handler
 		try {
-			switch (type) {
+			switch (envelope.type) {
 				case 'getMessages':
 					await handleGetMessages(ws);
 					break;
 				case 'sendMessage':
-					await handleSendMessage(payload, wss.clients);
+					await handleSendMessage(envelope.payload, wss.clients);
 					break;
 				default:
-					ws.send(JSON.stringify({ type: 'error', message: `Unknown message type: "${type}"` }));
+					ws.send(JSON.stringify({ type: 'error', message: `Unknown message type: "${envelope.type}"` }));
 			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'Internal server error';
