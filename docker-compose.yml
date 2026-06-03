@@ -1,0 +1,106 @@
+# Root compose — starts all containerised services with: docker compose up -d
+#
+# Prerequisites:
+#   - Copy services/rest/.env.example → services/rest/.env and fill in Auth0 credentials
+#
+# Ports:
+#   REST      → http://localhost:5286
+#   SOAP      → http://localhost:5292
+#   gRPC      → localhost:50052
+#   WebSocket → ws://localhost:3000
+#   GraphQL   → http://localhost:4000
+
+services:
+  # ── Shared infrastructure ──────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      # Multiple databases are created via init script so SOAP and GraphQL don't collide
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Services ───────────────────────────────────────────────────────────────
+
+  rest:
+    build:
+      context: services/rest
+      dockerfile: Dockerfile
+      target: development
+    env_file: services/rest/.env
+    environment:
+      - REDIS_CONNECTION_STRING=redis:6379
+    ports:
+      - "5286:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/rest/rest:/src
+      - rest-bin:/src/bin
+      - rest-obj:/src/obj
+
+  soap:
+    build:
+      context: services/soap
+      dockerfile: Dockerfile
+    environment:
+      - CONNECTION_STRING=Host=postgres;Database=soap;Username=postgres;Password=secret
+    ports:
+      - "5292:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  grpc:
+    build:
+      context: services/grpc
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50052"
+
+  websocket:
+    build:
+      context: services/websocket
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=file:./chat.db
+      - PORT=3000
+    ports:
+      - "3000:3000"
+
+  graph:
+    build:
+      context: services/graph
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://postgres:secret@postgres:5432/graph
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  rest-bin:
+  rest-obj:
