@@ -41,21 +41,29 @@ services:
     ports:
       - "5432:5432"
     restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${GRAPH_POSTGRES_USER} -d ${GRAPH_POSTGRES_DB}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - graph-db-data:/var/lib/postgresql/data/18
 
   graph-api:
-    image: node:20-bullseye-slim
-    working_dir: /app
-    command: sh -c "npm install && npm run prepare && npm run start"
+    build:
+      context: ./services/graph
+      dockerfile: Dockerfile
     ports:
       - "4000:4000"
     depends_on:
-      - graph-db
+      graph-db:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${GRAPH_DATABASE_URL}
-    volumes:
-      - ./services/graph:/app
 
   grpc-chat-service:
     build:
