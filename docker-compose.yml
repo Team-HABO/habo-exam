@@ -1,0 +1,128 @@
+services:
+  rest-redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rest-api:
+    build:
+      context: ./services/rest
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "5286:8080"
+    depends_on:
+      rest-redis:
+        condition: service_healthy
+    environment:
+      Auth0_Audience: ${Auth0_Audience}
+      Auth0_ClientId: ${Auth0_ClientId}
+      Auth0_ClientSecret: ${Auth0_ClientSecret}
+      Auth0_Domain: ${Auth0_Domain}
+      Auth0_Authority: ${Auth0_Authority}
+      REDIS_CONNECTION_STRING: ${REDIS_CONNECTION_STRING}
+    volumes:
+      - ./services/rest/rest:/src
+      - rest-bin:/src/bin
+      - rest-obj:/src/obj
+
+  graph-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${GRAPH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${GRAPH_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${GRAPH_POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${GRAPH_POSTGRES_USER} -d ${GRAPH_POSTGRES_DB}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - graph-db-data:/var/lib/postgresql/data/18
+
+  graph-api:
+    build:
+      context: ./services/graph
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    depends_on:
+      graph-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${GRAPH_DATABASE_URL}
+
+  grpc-chat-service:
+    build:
+      context: ./services/grpc
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50052"
+    volumes:
+      - grpc-data:/app/data
+
+  soap-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${SOAP_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${SOAP_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${SOAP_POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    restart: always
+    volumes:
+      - soap-db-data:/var/lib/postgresql/data/18
+
+  soap-pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_MAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PW}
+    ports:
+      - "5050:80"
+    restart: always
+
+  soap-service:
+    build:
+      context: ./services/soap
+      dockerfile: Dockerfile
+    ports:
+      - "5292:8080"
+    depends_on:
+      - soap-db
+      - soap-pgadmin
+    environment:
+      CONNECTION_STRING: ${SOAP_CONNECTION_STRING}
+
+  websocket-service:
+    image: node:20-bullseye-slim
+    working_dir: /app
+    # command: sh -c "npm install && npm run db:migrate && npm run dev"
+    command: sh -c "npm install && npx prisma generate && npm run db:migrate && npm run dev"
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: ${WEBSOCKET_DATABASE_URL}
+      PORT: ${WEBSOCKET_PORT}
+    volumes:
+      - ./services/websocket:/app
+
+volumes:
+  rest-bin:
+  rest-obj:
+  graph-db-data:
+  soap-db-data:
+  grpc-data:

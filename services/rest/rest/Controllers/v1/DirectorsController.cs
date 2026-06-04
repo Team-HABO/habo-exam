@@ -22,6 +22,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<PaginatedResult<DirectorHateoasDto>>> GetAll(
             [FromQuery][Range(1, int.MaxValue)] int page = 1,
             [FromQuery][Range(1, int.MaxValue)] int pageSize = 10,
@@ -72,7 +73,7 @@ namespace rest.Controllers.v1
                 ));
             var searchLink = new Link(
                 href: "/api/v1/Directors{?search}",
-                rel: "search",
+                rel: "search-by-firstname-or-lastname",
                 method: "GET"
             );
             searchLink.Templated = true;
@@ -85,6 +86,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetById([Range(1, int.MaxValue)] int id)
         {
             var director = await _repository.GetByIdAsync(id);

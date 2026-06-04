@@ -26,6 +26,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(NoStore = true)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var client = _httpClientFactory.CreateClient();
@@ -57,6 +58,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(NoStore = true)]
         public async Task<IActionResult> Logout(string jwtId)
         {
             // Extract claims from the validated JWT (already authenticated by [Authorize])

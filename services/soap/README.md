@@ -80,22 +80,12 @@ soap/
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - A PostgreSQL instance (set the connection string via the `CONNECTION_STRING` environment variable)
 
-### Run the service
-
-```bash
-cd services/soap
-CONNECTION_STRING="Host=localhost;Database=soap;Username=postgres;Password=secret" dotnet run
-```
-
-The service starts on `http://localhost:5292` by default (see [Properties/launchSettings.json](Properties/launchSettings.json) for the exact port).
-
-On startup the service automatically applies pending EF Core migrations and seeds the database with sample artist data if the table is empty.
-
 ### Run with Docker
 
+Make sure to fill out the .env file. Run in Dev Container. Once running, type:
+
 ```bash
-docker build -t soap-service .
-docker run -e CONNECTION_STRING="Host=host.docker.internal;Database=soap;Username=postgres;Password=secret" -p 8080:8080 soap-service
+dotnet start
 ```
 
 ### Verify it is running
@@ -231,11 +221,3 @@ Artist
 ```
 
 The database is PostgreSQL, configured via the `CONNECTION_STRING` environment variable. On first run the service applies migrations and seeds sample artist data (Leonardo da Vinci, Frida Kahlo, Pablo Picasso, etc.).
-
----
-
-## Further Reading
-
-- [W3C SOAP Specification](https://www.w3.org/TR/soap/)
-- [SoapCore GitHub](https://github.com/DigDes/SoapCore)
-- [WSDL explained](https://www.w3.org/TR/wsdl20/)

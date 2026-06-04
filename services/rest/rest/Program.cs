@@ -44,6 +44,9 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IDirectorsRepository, DirectorsRepository>();
 builder.Services.AddScoped<IProductionCompaniesRepository, ProductionCompaniesRepository>();
 builder.Services.AddControllers();
+
+// Add cache middleware:
+builder.Services.AddResponseCaching();
 // XSS sanitation
 builder.Services.AddScoped<IHtmlSanitizer, HtmlSanitizer>();
 
@@ -87,6 +90,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// Enable chache-middleware
+app.UseResponseCaching();
 
 //Add headers to response
 app.Use(async (context, next) =>

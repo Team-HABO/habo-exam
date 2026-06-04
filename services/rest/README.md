@@ -74,6 +74,20 @@ Common CSP directives used:
 - `base-uri 'none'`: Prevent relative links from resolving to an attacker domain (for example, via a `<base href="https://evil.com">` tag).
 
 ## OAuth 2.0 (Auth0)
+This API uses Grant Type: Password and Scope: openid profile email
+A successful login grants an Access token and ID token, the REST API validates the Access token, and data on the user can be extracted from the ID token. Because we get data on the user, we are using OpenID Connect on top of OAuth 2.0
+
+| OAuth Component               | Our setup                                          
+| ----------------------------- | ------------------------------------------------------------- 
+| **Resource Owner**            | The user whose credentials are in the Login POST request
+| **Client**                    | The ASP.NET API (it holds client ID and secret)     
+| **Authorization Server**      | Auth0 (https://{Auth0_Domain}/oauth/token)            
+| **Resource Server**           | The ASP.NET API - it validates tokens on [Authorize] endpoints      
+| **Grant Type**                | Password          
+| **Scope**                     | openid profile email - making it OIDC 
+
+
+                               
 This API uses Auth0 as the OAuth server. A custom API is created in Auth0 to register this API. Steps:
 1. Give the custom API a name and a unique identifier (used as the `audience` parameter on authorization calls).
 2. For the Logout endpoint we need an ID for the generated JWT, so choose the JSON Web Token (JWT) Profile, RFC 9068.
@@ -82,7 +96,7 @@ This API uses Auth0 as the OAuth server. A custom API is created in Auth0 to reg
 5. After creating the API reference, add an application to it (a client used by the login endpoint).
 6. In the left menu, go to Applications -> Applications and click Create Application.
 7. Give it a name and choose Native.
-8. Open Advanced Settings, find Grant Types, and check the box for Password.
+8. Open Advanced Settings, find Grant Types, and check the box for Password (so we can test in postman).
 9. Under the API Access tab, grant User-delegated Access to the API reference created earlier.
 10. In the left menu, go to User Management -> Users and create a new user with the Username-Password-Authentication connection.
 
@@ -109,7 +123,13 @@ return StatusCode((int)response.StatusCode, content);
 ```
 
 ## Version Strategy
-This API uses URI versioning, meaning the version is in the path (for example, `api/v1/movies`). This is defined in each controller below the namespace.
+This API uses URI versioning, meaning the version is in the path (for example, `api/v1/movies`). This is defined in each controller below the namespace:
+    namespace rest.Controllers.v1
+    {
+        [Route("api/v1/[controller]")]
+        [ApiController]
+        [Authorize]
+        public class DirectorsController : ControllerBase
 
 ## CORS
 CORS is configured in `Program.cs` to allow any method from the client `http://localhost:3000`.
@@ -153,9 +173,76 @@ ASP.NET automatically adds these headers to responses:
     Identifies the web server software handling the request. This can leak infrastructure information, so you might remove it.
 - `Transfer-Encoding: chunked`
     Describes how the response body is transferred over HTTP. Chunked means the server sends the response in pieces, without knowing the full response size beforehand.
+- `Cache-Control: no-store`
+    Response is not cacheable 
+- `Cache-Control: public,max-age=60`
+    Anyone (public) may cache this response for 60 seconds
+
+## Cacheability
+All responses contain a Cache-Control header.
+Caching is implemented on all endpoints by adding either
+[ResponseCache(NoStore = true)] non-cacheable 
+Will contain header: `Cache-Control: no-store`
+or
+[ResponseCache(Duration = 60)]: cacheable for 60 seconds
+Will contain header: `Cache-Control: public,max-age=60`
+
+It is possible to specify what cache may cache the response. It is public by default meaning any cache may cache this response.
+To specify, use:
+[ResponseCache(
+    Duration = 60,
+    Location = ResponseCacheLocation.Any
+)]
+To only let browser/client cache:
+[ResponseCache(
+    Duration = 60,
+    Location = ResponseCacheLocation.Client
+)]
+
+
 
 ## Hypermedia as the Engine of Application State (HATEOAS)
 All endpoints implement HATEOAS with contextual links, using the HAL (Hypertext Application Language) convention.
+See rest/rest/Helpers/Link.cs
+Get movie by ID:
+```json
+
+    "_links": [
+        {
+            "href": "/api/v1/Movies/1",
+            "rel": "self",
+            "method": "GET",
+            "templated": false
+        },
+        {
+            "href": "/api/v1/Movies/1",
+            "rel": "update",
+            "method": "PUT",
+            "templated": false
+        },
+        {
+            "href": "/api/v1/Movies/1",
+            "rel": "delete",
+            "method": "DELETE",
+            "templated": false
+        },
+        {
+            "href": "/api/v1/Movies",
+            "rel": "collection",
+            "method": "GET",
+            "templated": false
+        }
+    ]
+```
+Director and Production Company only contain links to the collection and Get By ID
+In the collection, each item contains link to get that item by ID
+The Templated property is true when the link contains placeholders, this only applies to the link on GetAll endpoints that tells the user they can search. Specifically it tells the user to not use the link as-is, for example:
+/api/v1/Movies{?search} 
+
+## Pagination and filtering (Search)
+See rest/rest/Helpers/PaginatedResult.cs
+A response to a Get All request contains current page, page size, total count, total pages and links for navigating the collection (first, last, previous, next and search), 
+All navigation links contain current query parameters and their values
 
 ## Postman Tests
 To run the tests, you need two environment variables as seen in `REST-API-v1.postman_environment.json`.
