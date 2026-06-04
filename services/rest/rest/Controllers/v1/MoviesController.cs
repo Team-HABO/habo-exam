@@ -26,6 +26,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<PaginatedResult<MovieHateoasDto>>> GetAll(
             [FromQuery][Range(1, int.MaxValue)] int page = 1, 
             [FromQuery][Range(1, int.MaxValue)] int pageSize = 10,
@@ -80,7 +81,7 @@ namespace rest.Controllers.v1
             }
             var searchLink = new Link(
                 href: "/api/v1/Movies{?search}",
-                rel: "search",
+                rel: "search-by-title",
                 method: "GET"
             );
             searchLink.Templated = true;
@@ -94,6 +95,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetById([Range(1, int.MaxValue)] int id)
         {
             var movie = await _repository.GetByIdAsync(id);
@@ -133,6 +135,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(NoStore = true)]
         public async Task<IActionResult> Create([FromBody] MovieDto dto)
         {
             var movie = new Movie
@@ -178,6 +181,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(NoStore = true)]
         public async Task<ActionResult> Put([Range(1, int.MaxValue)] int id, [FromBody] MovieDto movie)
         {
             movie.Title = _sanitizer.Sanitize(movie.Title);
@@ -214,6 +218,7 @@ namespace rest.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ResponseCache(NoStore = true)]
         public async Task<ActionResult> Delete([Range(1, int.MaxValue)] int id)
         {
             var deleted = await _repository.DeleteAsync(id);
