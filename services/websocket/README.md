@@ -29,15 +29,23 @@ DATABASE_URL="file:./dev.db"
 PORT=3000
 ```
 
-### 3. Run database migrations
+### 3. Generate the Prisma client
+
+```bash
+npm run db:generate
+```
+
+This generates the TypeScript client from the Prisma schema. Required before running the app.
+
+### 4. Run database migrations
 
 ```bash
 npm run db:migrate
 ```
 
-This creates the SQLite database and the `Message` table.
+This creates the SQLite database and the `Message` table. Also regenerates the Prisma client automatically.
 
-### 4. Start the server
+### 5. Start the server
 
 **Development (hot-reload):**
 
@@ -137,7 +145,10 @@ All string inputs are passed through the [`xss`](https://github.com/leizongmin/j
 // sanitize.ts
 import xss from 'xss';
 export function sanitize(input: unknown): string {
-  return xss((input as string).trim());
+  if (typeof input !== 'string') {
+    throw new TypeError('Expected a string');
+  }
+  return xss(input.trim());
 }
 ```
 
