@@ -83,6 +83,15 @@ services:
     ports:
       - "5433:5432"
     restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${SOAP_POSTGRES_USER} -d ${SOAP_POSTGRES_DB}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - soap-db-data:/var/lib/postgresql/data/18
 
@@ -102,8 +111,8 @@ services:
     ports:
       - "5292:8080"
     depends_on:
-      - soap-db
-      - soap-pgadmin
+      soap-db:
+        condition: service_healthy
     environment:
       CONNECTION_STRING: ${SOAP_CONNECTION_STRING}
 
