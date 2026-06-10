@@ -31,6 +31,7 @@ class ChatService(chat_pb2_grpc.ChatServiceServicer):
 
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+        # Database connection established and save message in DB
         conn = get_connection()
         try:
             cursor = conn.execute(
